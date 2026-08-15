@@ -62,6 +62,8 @@ FastApiBackbone/
 ├── alembic/              # migration environment
 ├── docs/
 │   └── MILESTONES.md     # completion and hardening tracker
+├── .github/workflows/
+│   └── release.yml       # build + Trusted Publishing to PyPI
 ├── .env.example
 ├── alembic.ini
 ├── pyproject.toml
@@ -80,21 +82,41 @@ source .venv/bin/activate
 pip install -e '.[dev]'
 ```
 
+### From PyPI
+
+Once the `v0.1.0` release has been published:
+
+```bash
+pip install fastapi-backbone
+```
+
+The package metadata uses the distribution name `fastapi-backbone` and requires Python 3.11+.
+
 ### Package build
 
 Build source and wheel distributions locally:
 
 ```bash
 python -m build
-```
-
-Validate the generated distributions:
-
-```bash
 twine check dist/*
 ```
 
-The package metadata uses the distribution name `fastapi-backbone` and requires Python 3.11+.
+## Publishing
+
+Releases use **PyPI Trusted Publishing** through GitHub Actions. The workflow at `.github/workflows/release.yml` builds and validates the source distribution and wheel, then publishes them using GitHub's OIDC identity rather than a long-lived PyPI API token.
+
+To enable the first release, configure a PyPI Trusted Publisher with:
+
+| Setting | Value |
+|---|---|
+| Owner | `safuh` |
+| Repository | `FastApiBackbone` |
+| Workflow | `release.yml` |
+| GitHub environment | `pypi` |
+
+Then create/publish the `v0.1.0` Git tag. The workflow will build, validate, and publish the package automatically.
+
+For security, the workflow's publishing job has only `id-token: write` permission. PyPI's Trusted Publishing mechanism issues a short-lived credential to the verified GitHub workflow instead of requiring a stored API token.
 
 ## Create an application
 
@@ -196,7 +218,7 @@ The foundation uses asynchronous FastAPI and SQLAlchemy primitives so consuming 
 
 ## Relationship to PAssist
 
-FastAPI Backbone is the **reusable infrastructure foundation**. urlPAssisthttps://github.com/safuh/Passist is a concrete AI application built on the same architectural ideas and extends them with identity, AI provider configuration, conversations, tools, knowledge/RAG, memory, and other domain capabilities.
+FastAPI Backbone is the **reusable infrastructure foundation**. PAssist is a concrete AI application built on the same architectural ideas and extends them with identity, AI provider configuration, conversations, tools, knowledge/RAG, memory, and other domain capabilities.
 
 This separation is intentional:
 
