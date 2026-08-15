@@ -1,23 +1,25 @@
 # FastAPI Backbone
 
-A production-oriented, reusable foundation for Python backend projects built with FastAPI.
+**FastAPI Backbone** is a reusable, production-oriented foundation for Python backend projects.
 
-FastAPI is an excellent HTTP/API framework, but a durable backend application also needs configuration management, database lifecycle management, structured logging, health checks, error handling, dependency boundaries, testing conventions, and a migration strategy. **FastApiBackbone** provides that foundation without coupling it to a particular business domain.
+FastAPI solves the HTTP/API layer well, but a durable backend also needs configuration management, database lifecycle, migrations, structured logging, health checks, dependency boundaries, and a predictable application composition model. This project provides those foundations without coupling them to a business domain.
 
-## Goals
+> **Status: v0.1.0 Beta** — the core foundation is packaged and usable; production hardening continues through the tracked milestones.
 
-- Async-first application design.
-- FastAPI for the HTTP/API boundary.
-- SQLAlchemy 2.x with async sessions.
-- Alembic migrations from day one.
-- Pydantic v2 / pydantic-settings for validation and configuration.
-- PostgreSQL as the production database; SQLite remains convenient for local development.
-- Structured logging with structlog.
-- Explicit application lifespan and resource cleanup.
-- Domain/service/repository separation.
-- Dependency inversion so domain logic does not depend on HTTP or database implementation details.
-- Configuration through environment variables rather than hard-coded deployment settings.
-- Testable infrastructure with a small, understandable surface area.
+## What it provides
+
+- Async-first FastAPI application composition
+- Pydantic v2 / pydantic-settings configuration
+- Async SQLAlchemy 2.x sessions and engine management
+- PostgreSQL and SQLite support
+- Alembic migration configuration with an async environment
+- Structured logging with structlog
+- Explicit application lifespan and database cleanup
+- Liveness and readiness health endpoints
+- Environment-driven configuration
+- Reusable application factory
+- Clear separation between infrastructure and product/domain code
+- Development tooling configuration for pytest, Ruff, mypy, build, and Twine
 
 ## Architecture
 
@@ -32,72 +34,193 @@ FastAPI / HTTP boundary
   |      +--> application services
   |              |
   |              +--> repository interfaces / infrastructure
-  |              |
   |              +--> external service interfaces
   |
   +--> cross-cutting infrastructure
          |
-         +--> authentication / authorization
          +--> configuration
          +--> logging
          +--> database lifecycle
-         +--> exception handling
-         +--> observability
+         +--> exception handling owned by the application
+         +--> observability hooks
 
-SQLAlchemy 2.x <--> PostgreSQL
+SQLAlchemy 2.x <--> PostgreSQL / SQLite
         |
      Alembic
 ```
 
-The backbone deliberately does **not** prescribe an application domain. A project can add `identity`, `billing`, `orders`, `ai`, `documents`, `analytics`, or other bounded contexts without changing the foundation.
+The backbone intentionally remains **domain-neutral**. Consuming applications can add bounded contexts such as `identity`, `billing`, `orders`, `ai`, `documents`, or `analytics` without changing the foundation.
 
-## Suggested project structure
+## Repository layout
 
 ```text
-app/
-├── api/                 # HTTP routers and API composition
-├── core/                # configuration, database, lifecycle, logging
-├── domain/              # optional domain layer / shared contracts
-├── services/            # application use cases
-├── repositories/        # persistence abstractions
-├── infrastructure/      # concrete integrations
-└── main.py              # application composition root
-
-alembic/
-tests/
-scripts/
-docker/
-.env
-.env.example
-pyproject.toml
+FastApiBackbone/
+├── app/
+│   ├── api/              # HTTP routers and system endpoints
+│   ├── core/             # settings, database, lifespan, logging
+│   └── main.py           # reusable application factory + default app
+├── alembic/              # migration environment
+├── docs/
+│   └── MILESTONES.md     # completion and hardening tracker
+├── .env.example
+├── alembic.ini
+├── pyproject.toml
+└── README.md
 ```
 
-For larger systems, prefer bounded-context packages such as `app.identity`, `app.billing`, or `app.ai`, each owning its models, schemas, repositories, services, and routers.
+## Installation
 
-## Why this exists
-
-The project is intended as a **stable backend foundation**, not as another application framework. It establishes the decisions that should remain boring and consistent across projects while leaving domain-specific decisions to the application.
-
-The architecture was proven while building [PAssist](https://github.com/safuh/Passist), a provider-agnostic AI operating platform. PAssist extends the same foundation with identity, AI provider configuration, conversations, tools, knowledge/RAG, memory, and multi-tenant capabilities.
-
-## Development
+### From source
 
 ```bash
+git clone https://github.com/safuh/FastApiBackbone.git
+cd FastApiBackbone
 python -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'
-cp .env.example .env
+```
+
+### Package build
+
+Build source and wheel distributions locally:
+
+```bash
+python -m build
+```
+
+Validate the generated distributions:
+
+```bash
+twine check dist/*
+```
+
+The package metadata uses the distribution name `fastapi-backbone` and requires Python 3.11+.
+
+## Create an application
+
+The default application is available as `app.main:app`.
+
+```bash
 uvicorn app.main:app --reload
 ```
 
-Health endpoint:
+For composition in another service, use the application factory:
 
-```bash
-curl http://127.0.0.1:8000/health
+```python
+from app.main import create_app
+
+app = create_app()
 ```
 
-## Production direction
+The factory accepts a `Settings` instance, which makes configuration substitution straightforward for tests and consuming applications.
 
-For production deployments, use PostgreSQL, a strong secret-management strategy, HTTPS at the edge, a real process supervisor/container runtime, centralized logs/metrics, connection-pool sizing appropriate to the deployment, and a migration step as part of release automation.
+## Configuration
 
-This repository is intentionally a foundation. Authentication, authorization, background jobs, caching, queues, tracing, and domain modules should be added according to the needs of the application rather than forced into every project.
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Core settings include:
+
+```text
+APP_NAME
+APP_VERSION
+ENVIRONMENT
+DEBUG
+API_PREFIX
+DATABASE_URL
+DATABASE_ECHO
+DATABASE_POOL_SIZE
+DATABASE_MAX_OVERFLOW
+LOG_LEVEL
+LOG_JSON
+```
+
+Production deployments should use PostgreSQL and inject secrets/configuration through the deployment environment or a dedicated secret manager rather than committing `.env` files.
+
+## Database
+
+The backbone exposes an async SQLAlchemy `Base`, an engine, an async session factory, and a FastAPI dependency for request-scoped sessions.
+
+```python
+from app.core.database import Base, get_db
+```
+
+PostgreSQL is the intended production database. SQLite with `aiosqlite` is supported for lightweight local development.
+
+Run migrations through Alembic:
+
+```bash
+alembic upgrade head
+```
+
+Generate a migration after adding application models:
+
+```bash
+alembic revision --autogenerate -m "describe change"
+```
+
+The backbone does not ship product-specific tables. The consuming application owns its models and migration revisions.
+
+## Health endpoints
+
+With the default `/api` prefix:
+
+```text
+GET /api/health/live
+GET /api/health/ready
+GET /api/health
+```
+
+`/health/live` is a lightweight process-level liveness check. `/health/ready` exposes application identity and environment information suitable for basic readiness monitoring. Product-specific dependency checks should be added by the consuming application.
+
+## Design principles
+
+### Domain neutrality
+
+The backbone provides infrastructure rather than business rules. Authentication, authorization, billing, AI providers, conversations, documents, and tool execution should be implemented by the consuming application's bounded contexts or optional modules.
+
+### Dependency inversion
+
+Application/domain code should depend on contracts rather than directly coupling business logic to FastAPI, SQLAlchemy, or external service implementations.
+
+### Configuration over hard-coding
+
+Deployment-specific behavior belongs in configuration. The settings layer supports local `.env` development while remaining compatible with environment-based production configuration.
+
+### Async-first
+
+The foundation uses asynchronous FastAPI and SQLAlchemy primitives so consuming applications can scale I/O-heavy workloads without replacing the infrastructure layer.
+
+## Relationship to PAssist
+
+FastAPI Backbone is the **reusable infrastructure foundation**. urlPAssisthttps://github.com/safuh/Passist is a concrete AI application built on the same architectural ideas and extends them with identity, AI provider configuration, conversations, tools, knowledge/RAG, memory, and other domain capabilities.
+
+This separation is intentional:
+
+```text
+FastAPI Backbone
+       |
+       | reusable infrastructure
+       v
+PAssist / other applications
+       |
+       +--> identity
+       +--> AI
+       +--> conversations
+       +--> documents
+       +--> tools
+       +--> domain-specific capabilities
+```
+
+## Development status
+
+The package is at **v0.1.0 Beta**. The core foundation is packaged and documented, while the hardening roadmap tracks additional concerns such as correlation IDs, centralized exception handling, optional authentication, generic repository contracts, integration-test infrastructure, CI, Docker examples, observability hooks, and security validation.
+
+See [`docs/MILESTONES.md`](docs/MILESTONES.md) for the current tracker.
+
+## License
+
+MIT License. Copyright © 2026 Safu Harry.
