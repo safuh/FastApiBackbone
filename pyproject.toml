@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "fastapi-backbone"
 version = "0.1.0"
-description = "A production-oriented, reusable foundation for Python backend projects built with FastAPI."
+description = "Production-grade infrastructure and project-generation foundation for FastAPI services."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [{name = "Safu Harry", email = "harrysafu@gmail.com"}]
-keywords = ["fastapi", "backend", "sqlalchemy", "postgresql", "alembic", "async", "architecture", "python"]
+keywords = ["fastapi", "sqlalchemy", "alembic", "jwt", "flutter", "docker", "kubernetes", "backend", "scaffolding"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
@@ -32,6 +32,7 @@ dependencies = [
     "pydantic>=2.8,<3.0",
     "pydantic-settings>=2.4,<3.0",
     "structlog>=24.4,<26.0",
+    "PyJWT>=2.9,<3.0",
 ]
 
 [project.optional-dependencies]
@@ -66,4 +67,5 @@ python_version = "3.11"
 ignore_missing_imports = true
 
 [tool.setuptools.packages.find]
-include = ["app*"]
+where = ["src"]
+include = ["fastapi_backbone*"]
