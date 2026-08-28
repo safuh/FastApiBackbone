@@ -4,6 +4,7 @@ import logging
 import sys
 
 import structlog
+from structlog.types import Processor
 
 from .config import Settings
 
@@ -16,12 +17,12 @@ def configure_logging(settings: Settings) -> None:
         level=getattr(logging, settings.log_level.upper(), logging.INFO),
         force=True,
     )
-    processors = [
+    processors: list[Processor] = [
         structlog.contextvars.merge_contextvars,
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso", utc=True),
     ]
-    renderer = (
+    renderer: Processor = (
         structlog.processors.JSONRenderer()
         if settings.log_json
         else structlog.dev.ConsoleRenderer()
