@@ -5,4 +5,6 @@ resources:
   - deployment.yaml
   - service.yaml
   - configmap.yaml
-  - secret.example.yaml
+
+# Create the real secret out-of-band (or through an approved secret manager).
+# `secret.example.yaml` is documentation only and must not be applied.
