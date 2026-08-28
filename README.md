@@ -1,78 +1,169 @@
 # FastAPI Backbone
 
-**FastAPI Backbone** is a reusable, production-oriented foundation for Python backend projects.
+> **A production-grade foundation and project generator for FastAPI services.**
+>
+> FastAPI + SQLAlchemy 2.x + Alembic + JWT authentication + PostgreSQL + Flutter + Docker + Kubernetes.
 
-FastAPI solves the HTTP/API layer well, but a durable backend also needs configuration management, database lifecycle, migrations, structured logging, health checks, dependency boundaries, and a predictable application composition model. This project provides those foundations without coupling them to a business domain.
+[![CI](https://github.com/safuh/FastApiBackbone/actions/workflows/ci.yml/badge.svg)](https://github.com/safuh/FastApiBackbone/actions/workflows/ci.yml)
 
-> **Status: v0.1.0 Beta** — the core foundation is packaged and usable; production hardening continues through the tracked milestones.
+FastAPI Backbone is an open-source, domain-neutral foundation for teams that want to start a serious Python API without rebuilding the same infrastructure every time.
 
-## What it provides
+The project is deliberately **not a business application** and not a monolithic framework. It provides reusable infrastructure, secure authentication primitives, conventions, deployment assets, documentation, and—over the roadmap—a project generator that creates an application developers own and can extend normally.
 
-- Async-first FastAPI application composition
-- Pydantic v2 / pydantic-settings configuration
-- Async SQLAlchemy 2.x sessions and engine management
-- PostgreSQL and SQLite support
-- Alembic migration configuration with an async environment
-- Structured logging with structlog
-- Explicit application lifespan and database cleanup
-- Liveness and readiness health endpoints
-- Environment-driven configuration
-- Reusable application factory
-- Clear separation between infrastructure and product/domain code
-- Development tooling configuration for pytest, Ruff, mypy, build, and Twine
+## Vision
+
+```text
+                         FastAPI Backbone
+                                |
+             +------------------+------------------+
+             |                  |                  |
+          Backend            Client          Deployment
+             |                  |                  |
+          FastAPI            Flutter          Docker
+          Pydantic             |            Kubernetes
+             |             OpenAPI               |
+       Application             |              CI/CD
+          layer                |
+             |                 |
+      SQLAlchemy 2.x <---------+
+             |
+          Alembic
+             |
+        PostgreSQL
+```
+
+The long-term developer experience is:
+
+```bash
+uv tool install fastapi-backbone
+fastapi-backbone new myapp --frontend flutter --deployment kubernetes
+cd myapp
+docker compose up
+```
+
+The generated project should be a complete, testable application—not a code dump that users are forced to understand before they can run it.
+
+## Goals
+
+### Core goals
+
+- Async-first FastAPI application composition.
+- SQLAlchemy 2.x as the ORM and PostgreSQL as the production database.
+- Alembic as the migration system.
+- Pydantic v2 and `pydantic-settings` for typed configuration.
+- Secure JWT/OAuth2 authentication primitives, with refresh-token rotation and revocation on the roadmap.
+- Clear separation of API, application/service, domain, repository, and infrastructure concerns.
+- Flutter as an optional first-class client generated from the backend's OpenAPI contract.
+- Docker for reproducible local and production builds.
+- Kubernetes manifests suitable for production hardening.
+- Automated testing of both the foundation and generated projects.
+- Security, type checking, linting, packaging, documentation, and release automation from the beginning.
+- Domain neutrality: consuming applications own their business models and bounded contexts.
+
+### Non-goals
+
+FastAPI Backbone will not become a kitchen-sink platform. Redis, Celery, Kafka, cloud-specific services, GraphQL, service meshes, and other integrations should remain optional extensions unless a strong ecosystem need justifies inclusion.
 
 ## Architecture
 
+The reference architecture is:
+
 ```text
-Client
+Client(s)
   |
   v
-FastAPI / HTTP boundary
+FastAPI HTTP boundary
   |
-  +--> API routers
-  |      |
-  |      +--> application services
-  |              |
-  |              +--> repository interfaces / infrastructure
-  |              +--> external service interfaces
+  +--> API routers / dependencies
+  |       |
+  |       v
+  |   Application services
+  |       |
+  |       +--> Domain contracts / policies
+  |       |
+  |       +--> Repository interfaces
+  |                 |
+  |                 v
+  |          Infrastructure adapters
+  |                 |
+  |              SQLAlchemy
+  |                 |
+  |             PostgreSQL
   |
-  +--> cross-cutting infrastructure
-         |
-         +--> configuration
-         +--> logging
-         +--> database lifecycle
-         +--> exception handling owned by the application
-         +--> observability hooks
+  +--> Cross-cutting infrastructure
+          |
+          +--> Configuration
+          +--> Logging / correlation context
+          +--> Error handling
+          +--> Security
+          +--> Health / readiness
+          +--> Observability
 
-SQLAlchemy 2.x <--> PostgreSQL / SQLite
-        |
-     Alembic
+OpenAPI ----------------------> Flutter API client
+
+Application artifact ----------> Docker ----------> Kubernetes
+                                      |
+                                      +--> migration Job
 ```
 
-The backbone intentionally remains **domain-neutral**. Consuming applications can add bounded contexts such as `identity`, `billing`, `orders`, `ai`, `documents`, or `analytics` without changing the foundation.
+### Dependency direction
+
+Business/application code should depend on abstractions, not on transport or infrastructure details:
+
+```text
+API -> application -> domain/contracts <- infrastructure
+```
+
+FastAPI and SQLAlchemy are implementation details at the boundaries. This keeps generated applications testable and makes it possible to replace an adapter without rewriting business logic.
 
 ## Repository layout
 
 ```text
 FastApiBackbone/
-├── app/
-│   ├── api/              # HTTP routers and system endpoints
-│   ├── core/             # settings, database, lifespan, logging
-│   └── main.py           # reusable application factory + default app
-├── alembic/              # migration environment
+├── src/
+│   └── fastapi_backbone/
+│       ├── api/                 # HTTP boundary and system endpoints
+│       ├── auth/                # JWT primitives and auth extension points
+│       ├── core/                # settings, DB lifecycle, logging, lifespan
+│       └── app.py               # composition root / application factory
+│
+├── tests/                       # foundation-level unit and smoke tests
+├── alembic/                     # migration environment
+├── templates/                   # generated project assets (roadmap)
+│   ├── backend/
+│   ├── flutter/
+│   └── kubernetes/
+│
+├── docker/                      # container and Compose assets
+├── kubernetes/                  # production deployment base/overlays
 ├── docs/
-│   └── MILESTONES.md     # completion and hardening tracker
-├── .github/workflows/
-│   └── release.yml       # build + Trusted Publishing to PyPI
+│   ├── architecture/            # architectural decisions and boundaries
+│   ├── modules/                  # module-specific documentation
+│   ├── security/                 # threat model and security practices
+│   └── MILESTONES.md             # living implementation tracker
+│
+├── .github/
+│   ├── workflows/               # CI, security, release automation
+│   └── ...
 ├── .env.example
-├── alembic.ini
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── LICENSE
 ├── pyproject.toml
 └── README.md
 ```
 
-## Installation
+## Current status
 
-### From source
+**Version: 0.1.0-alpha**
+
+The repository is being rebuilt around the production architecture described above. The current release establishes the package layout, application factory, async SQLAlchemy infrastructure, Alembic integration, structured logging, operational health endpoints, JWT token primitives, test foundation, and project governance. Flutter, the CLI generator, Docker, Kubernetes, full identity/RBAC, and generated-project contract tests are staged milestones rather than falsely presented as complete features.
+
+See **[`docs/MILESTONES.md`](docs/MILESTONES.md)** for the authoritative tracker. Every milestone records what is complete, what remains, acceptance criteria, and the next gate.
+
+## Quick start
+
+### Install from source
 
 ```bash
 git clone https://github.com/safuh/FastApiBackbone.git
@@ -82,167 +173,150 @@ source .venv/bin/activate
 pip install -e '.[dev]'
 ```
 
-### From PyPI
-
-Once the `v0.1.0` release has been published:
+### Run the reference application
 
 ```bash
-pip install fastapi-backbone
+uvicorn fastapi_backbone.app:create_app --factory --reload
 ```
 
-The package metadata uses the distribution name `fastapi-backbone` and requires Python 3.11+.
+The default application exposes:
 
-### Package build
+```text
+GET /api/health
+GET /api/health/live
+GET /api/health/ready
+```
 
-Build source and wheel distributions locally:
+Interactive API documentation is available from FastAPI's normal `/docs` endpoint while running in development.
+
+### Run tests and quality checks
 
 ```bash
+pytest
+ruff check .
+mypy src
 python -m build
 twine check dist/*
 ```
 
-## Publishing
+## Database and migrations
 
-Releases use **PyPI Trusted Publishing** through GitHub Actions. The workflow at `.github/workflows/release.yml` builds and validates the source distribution and wheel, then publishes them using GitHub's OIDC identity rather than a long-lived PyPI API token.
-
-To enable the first release, configure a PyPI Trusted Publisher with:
-
-| Setting | Value |
-|---|---|
-| Owner | `safuh` |
-| Repository | `FastApiBackbone` |
-| Workflow | `release.yml` |
-| GitHub environment | `pypi` |
-
-Then create/publish the `v0.1.0` Git tag. The workflow will build, validate, and publish the package automatically.
-
-For security, the workflow's publishing job has only `id-token: write` permission. PyPI's Trusted Publishing mechanism issues a short-lived credential to the verified GitHub workflow instead of requiring a stored API token.
-
-## Create an application
-
-The default application is available as `app.main:app`.
-
-```bash
-uvicorn app.main:app --reload
-```
-
-For composition in another service, use the application factory:
-
-```python
-from app.main import create_app
-
-app = create_app()
-```
-
-The factory accepts a `Settings` instance, which makes configuration substitution straightforward for tests and consuming applications.
-
-## Configuration
-
-Copy the example environment file:
-
-```bash
-cp .env.example .env
-```
-
-Core settings include:
-
-```text
-APP_NAME
-APP_VERSION
-ENVIRONMENT
-DEBUG
-API_PREFIX
-DATABASE_URL
-DATABASE_ECHO
-DATABASE_POOL_SIZE
-DATABASE_MAX_OVERFLOW
-LOG_LEVEL
-LOG_JSON
-```
-
-Production deployments should use PostgreSQL and inject secrets/configuration through the deployment environment or a dedicated secret manager rather than committing `.env` files.
-
-## Database
-
-The backbone exposes an async SQLAlchemy `Base`, an engine, an async session factory, and a FastAPI dependency for request-scoped sessions.
-
-```python
-from app.core.database import Base, get_db
-```
-
-PostgreSQL is the intended production database. SQLite with `aiosqlite` is supported for lightweight local development.
-
-Run migrations through Alembic:
+PostgreSQL is the production target. SQLite with `aiosqlite` is supported for lightweight local development and tests.
 
 ```bash
 alembic upgrade head
 ```
 
-Generate a migration after adding application models:
+The backbone does not ship product-specific database tables. Consuming applications own their models and migration revisions.
 
-```bash
-alembic revision --autogenerate -m "describe change"
-```
+A production deployment must treat migrations as an explicit release operation. Kubernetes deployments will use a migration Job rather than running `alembic upgrade head` in every application process.
 
-The backbone does not ship product-specific tables. The consuming application owns its models and migration revisions.
+See [`docs/modules/database/README.md`](docs/modules/database/README.md).
 
-## Health endpoints
+## Authentication
 
-With the default `/api` prefix:
+The current authentication module provides a small, testable JWT token service with:
 
-```text
-GET /api/health/live
-GET /api/health/ready
-GET /api/health
-```
+- signed tokens;
+- expiration validation;
+- token type validation;
+- required subject validation; and
+- a minimum secret length guard.
 
-`/health/live` is a lightweight process-level liveness check. `/health/ready` exposes application identity and environment information suitable for basic readiness monitoring. Product-specific dependency checks should be added by the consuming application.
+The complete identity layer is intentionally staged separately. Before a production identity release, the project must add password hashing, OAuth2 flows, refresh-token rotation/revocation, secure cookie/mobile storage guidance, user persistence, RBAC/scopes, rate limiting, audit events, and comprehensive security tests.
 
-## Design principles
+See [`docs/modules/auth/README.md`](docs/modules/auth/README.md) and [`SECURITY.md`](SECURITY.md).
 
-### Domain neutrality
+## Flutter strategy
 
-The backbone provides infrastructure rather than business rules. Authentication, authorization, billing, AI providers, conversations, documents, and tool execution should be implemented by the consuming application's bounded contexts or optional modules.
-
-### Dependency inversion
-
-Application/domain code should depend on contracts rather than directly coupling business logic to FastAPI, SQLAlchemy, or external service implementations.
-
-### Configuration over hard-coding
-
-Deployment-specific behavior belongs in configuration. The settings layer supports local `.env` development while remaining compatible with environment-based production configuration.
-
-### Async-first
-
-The foundation uses asynchronous FastAPI and SQLAlchemy primitives so consuming applications can scale I/O-heavy workloads without replacing the infrastructure layer.
-
-## Relationship to PAssist
-
-FastAPI Backbone is the **reusable infrastructure foundation**. PAssist is a concrete AI application built on the same architectural ideas and extends them with identity, AI provider configuration, conversations, tools, knowledge/RAG, memory, and other domain capabilities.
-
-This separation is intentional:
+Flutter is a **first-class optional client**, not a backend dependency. The backend remains standards-based and useful to any client.
 
 ```text
-FastAPI Backbone
-       |
-       | reusable infrastructure
-       v
-PAssist / other applications
-       |
-       +--> identity
-       +--> AI
-       +--> conversations
-       +--> documents
-       +--> tools
-       +--> domain-specific capabilities
+FastAPI
+   |
+ OpenAPI
+   |
+   +----> Flutter generated API client
+   +----> Web client
+   +----> CLI / integrations
 ```
 
-## Development status
+The roadmap will provide a small Flutter shell with authentication state, secure token storage abstraction, API client, environment configuration, and generated models. The generated client should be derived from OpenAPI rather than duplicating backend schemas manually.
 
-The package is at **v0.1.0 Beta**. The core foundation is packaged and documented, while the hardening roadmap tracks additional concerns such as correlation IDs, centralized exception handling, optional authentication, generic repository contracts, integration-test infrastructure, CI, Docker examples, observability hooks, and security validation.
+See [`docs/modules/flutter/README.md`](docs/modules/flutter/README.md).
 
-See [`docs/MILESTONES.md`](docs/MILESTONES.md) for the current tracker.
+## Docker and Kubernetes strategy
+
+Docker provides reproducible application artifacts. Kubernetes is an optional production deployment target.
+
+The intended deployment flow is:
+
+```text
+CI
+ |
+ +--> test
+ +--> build wheel
+ +--> build Docker image
+ |
+ v
+registry
+ |
+ v
+Kubernetes
+ |
+ +--> migration Job
+ +--> Deployment
+ +--> Service
+ +--> Ingress
+ +--> readiness/liveness probes
+ +--> HPA (optional)
+```
+
+The Kubernetes layer will use a small base plus environment overlays and will avoid embedding real secrets in source control.
+
+## Production-grade definition
+
+For this project, **production-grade does not mean “it starts successfully.”** A milestone can only be called production-ready when it has:
+
+1. documented public behavior;
+2. automated tests at the appropriate unit/integration level;
+3. deterministic dependency and build configuration;
+4. static analysis and type checking;
+5. security validation and safe defaults;
+6. operational health/readiness behavior;
+7. migration and rollback considerations;
+8. container/deployment validation where applicable;
+9. upgrade/release documentation; and
+10. a reproducible CI gate.
+
+No feature is marked complete merely because its source file exists.
+
+## Open-source roadmap
+
+```text
+Phase 0  Architecture & governance       [DONE]
+Phase 1  Core package foundation         [IN PROGRESS]
+Phase 2  Database & migrations            [IN PROGRESS]
+Phase 3  Identity & JWT                   [PLANNED]
+Phase 4  Project generator / CLI          [PLANNED]
+Phase 5  Flutter client                   [PLANNED]
+Phase 6  Docker & local development       [PLANNED]
+Phase 7  Kubernetes production assets     [PLANNED]
+Phase 8  Observability & security         [PLANNED]
+Phase 9  Release candidate                [PLANNED]
+Phase 10 Public v1.0                     [PLANNED]
+```
+
+The exact checklist and acceptance criteria live in [`docs/MILESTONES.md`](docs/MILESTONES.md).
+
+## Contributing
+
+Contributions are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request. Architecture changes should include an ADR or an update to the relevant documentation when they materially affect public behavior or dependency boundaries.
+
+## Security
+
+Please do not disclose security vulnerabilities in public issues. Follow [`SECURITY.md`](SECURITY.md).
 
 ## License
 
-MIT License. Copyright © 2026 Safu Harry.
+FastAPI Backbone is released under the MIT License. See [`LICENSE`](LICENSE).
