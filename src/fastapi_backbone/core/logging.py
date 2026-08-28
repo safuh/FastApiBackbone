@@ -21,7 +21,12 @@ def configure_logging(settings: Settings) -> None:
         structlog.processors.add_log_level,
         structlog.processors.TimeStamper(fmt="iso", utc=True),
     ]
-    processors.append(structlog.processors.JSONRenderer() if settings.log_json else structlog.dev.ConsoleRenderer())
+    renderer = (
+        structlog.processors.JSONRenderer()
+        if settings.log_json
+        else structlog.dev.ConsoleRenderer()
+    )
+    processors.append(renderer)
     structlog.configure(
         processors=processors,
         wrapper_class=structlog.make_filtering_bound_logger(
