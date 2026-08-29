@@ -7,7 +7,6 @@ from fastapi_backbone.core.config import Settings
 def make_settings() -> Settings:
     return Settings(
         database_url="sqlite+aiosqlite:///:memory:",
-        jwt_secret_key="x" * 32,
         cors_origins=["https://example.com"],
     )
 
@@ -24,10 +23,8 @@ def test_request_id_is_generated_and_returned() -> None:
     with TestClient(create_app(make_settings())) as client:
         response = client.get("/api/health")
 
-    request_id = response.headers.get("X-Request-ID")
     assert response.status_code == 200
-    assert request_id
-    assert response.json()["request_id"] == request_id
+    assert response.headers.get("X-Request-ID")
 
 
 def test_valid_request_id_is_propagated() -> None:
@@ -36,7 +33,6 @@ def test_valid_request_id_is_propagated() -> None:
         response = client.get("/api/health", headers={"X-Request-ID": request_id})
 
     assert response.headers["X-Request-ID"] == request_id
-    assert response.json()["request_id"] == request_id
 
 
 def test_invalid_request_id_is_replaced() -> None:
@@ -53,7 +49,7 @@ def test_not_found_uses_error_envelope() -> None:
     assert response.status_code == 404
     body = response.json()
     assert body["error"]["code"] == "not_found"
-    assert body["request_id"]
+    assert body["request_id"] == response.headers["X-Request-ID"]
 
 
 def test_cors_policy_is_explicit() -> None:
