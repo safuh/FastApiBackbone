@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     database_max_overflow: int = Field(default=10, ge=0)
     log_level: str = "INFO"
     log_json: bool = False
+    cors_origins: list[str] = Field(default_factory=list)
+    cors_allow_credentials: bool = False
+    cors_allow_methods: list[str] = Field(default_factory=lambda: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
+    cors_allow_headers: list[str] = Field(default_factory=lambda: ["Authorization", "Content-Type", "X-Request-ID"])
 
 
 @lru_cache(maxsize=1)
