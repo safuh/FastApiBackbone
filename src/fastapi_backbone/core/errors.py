@@ -22,7 +22,12 @@ class BackboneError(Exception):
         Exception.__init__(self, self.message)
 
 
-def _payload(request: Request, code: str, message: str, details: Any | None = None) -> dict[str, Any]:
+def _payload(
+    request: Request,
+    code: str,
+    message: str,
+    details: Any | None = None,
+) -> dict[str, Any]:
     body: dict[str, Any] = {
         "error": {
             "code": code,
@@ -42,21 +47,35 @@ async def backbone_error_handler(request: Request, exc: BackboneError) -> JSONRe
     )
 
 
-async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+async def validation_error_handler(
+    request: Request,
+    exc: RequestValidationError,
+) -> JSONResponse:
     return JSONResponse(
         status_code=422,
-        content=_payload(request, "validation_error", "Request validation failed", exc.errors()),
+        content=_payload(
+            request,
+            "validation_error",
+            "Request validation failed",
+            exc.errors(),
+        ),
     )
 
 
-async def http_error_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+async def http_error_handler(
+    request: Request,
+    exc: StarletteHTTPException,
+) -> JSONResponse:
     code = "http_error"
     detail = exc.detail if isinstance(exc.detail, str) else "HTTP request failed"
     if exc.status_code == 404:
         code = "not_found"
     elif exc.status_code == 405:
         code = "method_not_allowed"
-    return JSONResponse(status_code=exc.status_code, content=_payload(request, code, detail))
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=_payload(request, code, detail),
+    )
 
 
 async def unhandled_error_handler(request: Request, exc: Exception) -> JSONResponse:
