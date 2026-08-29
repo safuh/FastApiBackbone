@@ -4,10 +4,10 @@ from collections.abc import Awaitable, Callable
 from contextlib import suppress
 from uuid import UUID, uuid4
 
+import structlog
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
-import structlog
 
 
 _REQUEST_ID_HEADER = "X-Request-ID"
