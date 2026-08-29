@@ -1,16 +1,70 @@
 from fastapi.testclient import TestClient
 
-from fastapi_backbone import create_app
+from fastapi_backbone.app import create_app
 from fastapi_backbone.core.config import Settings
 
 
-def test_health_endpoints() -> None:
-    settings = Settings(database_url="sqlite+aiosqlite:///./test.db")
-    with TestClient(create_app(settings)) as client:
-        response = client.get("/api/health/live")
-        assert response.status_code == 200
-        assert response.json()["status"] == "ok"
+def make_settings() -> Settings:
+    return Settings(
+        database_url="sqlite+aiosqlite:///:memory:",
+        jwt_secret_key="x" * 32,
+        cors_origins=["https://example.com"],
+    )
 
-        response = client.get("/api/health/ready")
-        assert response.status_code == 200
-        assert response.json()["status"] == "ready"
+
+def test_health_endpoint() -> None:
+    with TestClient(create_app(make_settings())) as client:
+        response = client.get("/api/health")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+
+
+def test_request_id_is_generated_and_returned() -> None:
+    with TestClient(create_app(make_settings())) as client:
+        response = client.get("/api/health")
+
+    request_id = response.headers.get("X-Request-ID")
+    assert response.status_code == 200
+    assert request_id
+    assert response.json()["request_id"] == request_id
+
+
+def test_valid_request_id_is_propagated() -> None:
+    request_id = "2f3b5b74-6a89-4e8e-a1b0-8e4ef1c4f9b1"
+    with TestClient(create_app(make_settings())) as client:
+        response = client.get("/api/health", headers={"X-Request-ID": request_id})
+
+    assert response.headers["X-Request-ID"] == request_id
+    assert response.json()["request_id"] == request_id
+
+
+def test_invalid_request_id_is_replaced() -> None:
+    with TestClient(create_app(make_settings())) as client:
+        response = client.get("/api/health", headers={"X-Request-ID": "not-a-uuid"})
+
+    assert response.headers["X-Request-ID"] != "not-a-uuid"
+
+
+def test_not_found_uses_error_envelope() -> None:
+    with TestClient(create_app(make_settings())) as client:
+        response = client.get("/api/does-not-exist")
+
+    assert response.status_code == 404
+    body = response.json()
+    assert body["error"]["code"] == "not_found"
+    assert body["request_id"]
+
+
+def test_cors_policy_is_explicit() -> None:
+    with TestClient(create_app(make_settings())) as client:
+        response = client.options(
+            "/api/health",
+            headers={
+                "Origin": "https://example.com",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "https://example.com"
