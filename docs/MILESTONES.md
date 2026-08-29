@@ -32,9 +32,9 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Structured logging foundation.
 - [x] Liveness/readiness endpoints.
 - [x] Basic smoke tests.
-- [ ] Correlation/request IDs.
-- [ ] Central exception taxonomy and handlers.
-- [ ] CORS/security middleware configuration.
+- [x] Correlation/request IDs.
+- [x] Central exception taxonomy and handlers.
+- [x] CORS/security middleware configuration.
 - [ ] Integration-test fixtures.
 - [ ] Full type-checking gate without ignored application errors.
 
@@ -138,13 +138,13 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 
 ## Phase 8 — Observability & security hardening
 
-**Status: [ ] Pending**
+**Status: [~] In progress**
 
-- [ ] Correlation IDs propagated through logs.
+- [x] Correlation IDs propagated through responses and structured logging context.
 - [ ] OpenTelemetry integration point.
 - [ ] Metrics integration point.
 - [ ] Structured audit events for identity operations.
-- [ ] Dependency vulnerability scanning.
+- [x] Dependency vulnerability scanning.
 - [ ] Secret scanning.
 - [ ] SBOM/release provenance.
 - [ ] Threat model review.
