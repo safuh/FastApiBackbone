@@ -77,7 +77,9 @@ class UnitOfWork:
             await self.session.close()
 
 
-async def get_db(session_factory: async_sessionmaker[AsyncSession]) -> AsyncIterator[AsyncSession]:
+async def get_db(
+    session_factory: async_sessionmaker[AsyncSession],
+) -> AsyncIterator[AsyncSession]:
     """Yield a request-scoped session and rollback failed requests."""
     async with session_factory() as session:
         try:
