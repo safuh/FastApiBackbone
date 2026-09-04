@@ -13,6 +13,7 @@ def test_alembic_upgrade_and_downgrade() -> None:
 
     env = os.environ.copy()
     env["DATABASE_URL"] = url
-    subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], check=True, env=env)
-    subprocess.run([sys.executable, "-m", "alembic", "downgrade", "base"], check=True, env=env)
-    subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], check=True, env=env)
+    command = [sys.executable, "-m", "alembic"]
+    subprocess.run([*command, "upgrade", "head"], check=True, env=env)
+    subprocess.run([*command, "downgrade", "base"], check=True, env=env)
+    subprocess.run([*command, "upgrade", "head"], check=True, env=env)
