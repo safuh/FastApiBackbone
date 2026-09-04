@@ -72,18 +72,19 @@ class Settings(BaseSettings):
     def for_profile(cls, profile: Environment | str) -> "Settings":
         """Build deterministic settings for tests, local development, or production."""
         environment = Environment(profile)
-        defaults: dict[str, object] = {"environment": environment}
         if environment is Environment.TEST:
-            defaults.update(
+            return cls(
+                environment=environment,
                 database_url="sqlite+aiosqlite:///:memory:",
                 log_json=False,
             )
-        elif environment is Environment.PRODUCTION:
-            defaults.update(
+        if environment is Environment.PRODUCTION:
+            return cls(
+                environment=environment,
                 database_url="postgresql+asyncpg://backbone:backbone@localhost:5432/backbone",
                 log_json=True,
             )
-        return cls(**defaults)
+        return cls(environment=environment)
 
 
 @lru_cache(maxsize=1)
