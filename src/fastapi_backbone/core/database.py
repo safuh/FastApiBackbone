@@ -20,16 +20,19 @@ class Base(DeclarativeBase):
 
 def create_engine(settings: Settings) -> AsyncEngine:
     """Create the shared async engine."""
-    kwargs: dict[str, object] = {
-        "echo": settings.database_echo,
-        "pool_pre_ping": settings.database_pool_pre_ping,
-    }
     if settings.database_url.startswith("postgresql+asyncpg://"):
-        kwargs.update(
+        return create_async_engine(
+            settings.database_url,
+            echo=settings.database_echo,
+            pool_pre_ping=settings.database_pool_pre_ping,
             pool_size=settings.database_pool_size,
             max_overflow=settings.database_max_overflow,
         )
-    return create_async_engine(settings.database_url, **kwargs)
+    return create_async_engine(
+        settings.database_url,
+        echo=settings.database_echo,
+        pool_pre_ping=settings.database_pool_pre_ping,
+    )
 
 
 def create_session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
