@@ -5,54 +5,71 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 ## Status legend
 
 - `[x]` Complete and verified
-- `[~]` In progress
+- `[~]` Implemented but awaiting verification
 - `[ ]` Pending
 
-## Phase 0 — Architecture & governance
+## M1 — Core Foundation
 
-**Status: [x] Complete**
+**Status: [~] Implemented; final verification is the release gate**
 
-- [x] Define domain-neutral mission and non-goals.
-- [x] Choose src-layout packaging.
-- [x] Define API → application → contracts → infrastructure dependency direction.
-- [x] Establish MIT licensing and contribution/security policy.
-- [x] Establish milestone tracker and documentation structure.
-- [x] Establish production-grade acceptance definition.
+### Runtime contract
 
-**Gate:** repository can evolve without mixing product/domain code into the foundation.
+- [x] Canonical development command: `make run` / `uv run uvicorn fastapi_backbone.app:create_app --factory --reload`
+- [x] Canonical production command: `make prod` / `uv run uvicorn fastapi_backbone.app:create_app --factory --host 0.0.0.0 --port 8000`
+- [x] Application factory at `fastapi_backbone.app:create_app`
+- [x] Explicit configuration profiles: `development`, `test`, `production`
+- [x] Production rejects debug mode and non-PostgreSQL database URLs
+- [x] Structured logging with configurable human-readable/JSON output
+- [x] Request correlation IDs propagated through responses and logs
 
-## Phase 1 — Core package foundation
+### Database contract
 
-**Status: [~] In progress**
+- [x] Async SQLAlchemy 2.x engine and session factory
+- [x] Shared engine/session lifecycle owned by FastAPI lifespan
+- [x] Engine connectivity checked during non-test startup
+- [x] Engine disposed deterministically during shutdown
+- [x] Transaction-scoped `session_scope`
+- [x] Explicit `UnitOfWork` transaction boundary
+- [x] Alembic is the only schema migration mechanism
+- [x] Initial domain-neutral migration revision exists
+- [x] Production rule: migrations run as an explicit release operation, not per API process
 
-- [x] `fastapi_backbone` package and application factory.
-- [x] Typed Pydantic settings.
-- [x] Async SQLAlchemy engine/session infrastructure.
-- [x] Explicit FastAPI lifespan and engine disposal.
-- [x] Structured logging foundation.
-- [x] Liveness/readiness endpoints.
-- [x] Basic smoke tests.
-- [x] Correlation/request IDs.
-- [x] Central exception taxonomy and handlers.
-- [x] CORS/security middleware configuration.
-- [ ] Integration-test fixtures.
-- [ ] Full type-checking gate without ignored application errors.
+### Operational contract
 
-**Acceptance:** package installs, app boots, tests pass, resources shut down cleanly, and public APIs are documented.
+- [x] `/api/health/live` is process liveness and does not require database access
+- [x] `/api/health/ready` returns `503` until startup is complete or the database is unavailable
+- [x] Stable error envelope includes request ID
+- [x] CORS policy is explicitly configured
+
+### Verification contract
+
+- [x] Application smoke tests
+- [x] Startup/shutdown lifecycle tests
+- [x] SQLite session/UoW transaction tests
+- [x] PostgreSQL integration test with CI service container
+- [x] Alembic upgrade/downgrade/upgrade integration gate
+- [x] Docker Compose healthcheck
+- [x] Docker smoke-test script covering build, startup, health, readiness, and migration
+- [x] CI runs Python 3.11, 3.12, and 3.13
+- [ ] Final CI run is green on the branch
+- [ ] Final Docker smoke test is green in CI/local verification
+- [ ] Full mypy gate has zero application errors
+
+**M1 acceptance gate:** the final three verification items must be green before this milestone changes to `[x]`.
 
 ## Phase 2 — Database & migrations
 
-**Status: [~] In progress**
+**Status: [~] M1 database contract complete; advanced database tooling remains**
 
 - [x] SQLAlchemy 2.x async foundation.
 - [x] PostgreSQL and SQLite driver support.
 - [x] Alembic async environment.
 - [x] Domain-neutral metadata boundary.
-- [ ] Migration command helpers.
-- [ ] Transaction/unit-of-work guidance.
-- [ ] PostgreSQL integration tests in CI.
-- [ ] Migration upgrade/downgrade test gate.
-- [ ] Migration safety documentation.
+- [x] Transaction/unit-of-work guidance.
+- [x] PostgreSQL integration tests in CI.
+- [x] Migration upgrade/downgrade test gate.
+- [x] Migration safety documentation.
+- [ ] Additional migration command helpers.
 
 **Acceptance:** a clean checkout can create a database, run migrations, execute integration tests, and recover from a migration failure using documented procedures.
 
@@ -88,8 +105,6 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [ ] `doctor` environment diagnostics.
 - [ ] OpenAPI client generation command.
 
-**Acceptance:** a new project is reproducibly generated from a clean environment and passes the same quality gates as the reference project.
-
 ## Phase 5 — Flutter client
 
 **Status: [ ] Pending**
@@ -103,38 +118,29 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [ ] Login/logout/session refresh example.
 - [ ] Flutter tests and static analysis.
 
-**Acceptance:** generated Flutter client authenticates against a generated backend without hand-maintained duplicate API models.
-
 ## Phase 6 — Docker & local development
 
-**Status: [ ] Pending**
+**Status: [~] M1 Docker smoke contract implemented; production container hardening remains**
 
-- [ ] Production Dockerfile.
-- [ ] Development Dockerfile/Compose.
-- [ ] PostgreSQL Compose service.
-- [ ] Non-root container execution.
-- [ ] Health checks.
-- [ ] Reproducible builds and dependency caching.
-- [ ] Local one-command startup documentation.
-
-**Acceptance:** clean checkout → container build → database → migrations → API smoke test is deterministic.
+- [x] PostgreSQL Compose service.
+- [x] Non-root container execution.
+- [x] Health checks.
+- [x] Local smoke-test workflow.
+- [ ] Production Dockerfile hardening and reproducible lockfile workflow.
+- [ ] One-command production deployment path.
 
 ## Phase 7 — Kubernetes
 
 **Status: [ ] Pending**
 
-- [ ] Kustomize base.
-- [ ] Development/production overlays.
-- [ ] Deployment and Service.
-- [ ] ConfigMap and secret templates.
+- [ ] Kustomize base and overlays.
+- [ ] Deployment, Service, ConfigMap and secret templates.
 - [ ] Migration Job.
 - [ ] Readiness/liveness probes.
 - [ ] Resource requests/limits.
 - [ ] Ingress template.
-- [ ] HPA as an optional overlay.
+- [ ] Optional HPA overlay.
 - [ ] Rollout/rollback documentation.
-
-**Acceptance:** manifests pass static validation and a disposable cluster can deploy, migrate, become ready, and roll back using documented procedures.
 
 ## Phase 8 — Observability & security hardening
 
@@ -161,7 +167,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [ ] Changelog/release automation.
 - [ ] PyPI Trusted Publishing.
 - [ ] Generated-project compatibility matrix.
-- [ ] Upgrade guide from pre-1.0 releases.
+- [ ] Upgrade guide.
 - [ ] External contributor review.
 
 ## Phase 10 — v1.0

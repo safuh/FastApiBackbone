@@ -4,13 +4,32 @@ Thank you for contributing. FastAPI Backbone is intended to become reusable infr
 
 ## Development
 
+Use **uv** as the canonical dependency and environment manager.
+
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e '.[dev]'
-pytest
-ruff check .
-mypy src
+uv sync --extra dev
+make check
+```
+
+For the individual quality gates:
+
+```bash
+uv run pytest
+uv run ruff check .
+uv run mypy src
+```
+
+For the reference application:
+
+```bash
+make run
+make prod
+```
+
+For the Docker smoke contract:
+
+```bash
+make docker-test
 ```
 
 ## Pull requests
@@ -30,7 +49,29 @@ Security-sensitive changes require additional tests and documentation. Do not di
 
 If a change affects dependency direction, public API, authentication, persistence semantics, deployment behavior, or another major architectural decision, add or update an ADR under `docs/architecture/adr/`.
 
-## Commit discipline
+## Database changes
+
+Never edit an already-applied Alembic revision. Create a new revision and verify both upgrade and downgrade paths against PostgreSQL before opening a pull request.
+
+```bash
+uv run alembic revision -m "describe schema change"
+uv run alembic upgrade head
+```
+
+Application processes must not run migrations automatically at startup. Treat migrations as an explicit release operation.
+
+## Branch and commit discipline
+
+Keep `main` clean and work from feature branches. Before opening or updating a pull request:
+
+```bash
+git fetch origin
+git rebase origin/main
+make check
+git push --force-with-lease origin feat/my-change
+```
+
+Use `--force-with-lease`, never plain `--force`, after rebasing a private feature branch. Do not rebase a shared branch unless everyone using it agrees.
 
 Use concise conventional commit-style messages such as:
 

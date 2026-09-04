@@ -11,6 +11,20 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: backbone
+          POSTGRES_USER: backbone
+          POSTGRES_PASSWORD: backbone
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U backbone -d backbone"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     strategy:
       fail-fast: false
       matrix:
@@ -29,6 +43,8 @@ jobs:
       - name: Mypy
         run: mypy src
       - name: Tests
+        env:
+          TEST_DATABASE_URL: postgresql+asyncpg://backbone:backbone@localhost:5432/backbone
         run: pytest
       - name: Build distributions
         if: matrix.python-version == '3.13'
@@ -36,3 +52,11 @@ jobs:
       - name: Validate distributions
         if: matrix.python-version == '3.13'
         run: twine check dist/*
+
+  docker-smoke:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Docker smoke test
+        run: bash scripts/docker-smoke.sh
