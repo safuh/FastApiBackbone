@@ -3,11 +3,13 @@ import subprocess
 import sys
 
 import pytest
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import create_async_engine
 
 
 @pytest.mark.integration
-def test_alembic_upgrade_and_downgrade() -> None:
+@pytest.mark.asyncio
+async def test_alembic_upgrade_and_downgrade() -> None:
     url = os.getenv("TEST_DATABASE_URL")
     if not url:
         pytest.skip("TEST_DATABASE_URL is not configured")
@@ -17,18 +19,19 @@ def test_alembic_upgrade_and_downgrade() -> None:
     command = [sys.executable, "-m", "alembic"]
     subprocess.run([*command, "upgrade", "head"], check=True, env=env)
 
-    sync_url = url.replace("+asyncpg", "+psycopg")
-    with create_engine(sync_url).connect() as connection:
-        user_columns = {
-            row[0]
-            for row in connection.execute(
+    engine = create_async_engine(url)
+    try:
+        async with engine.connect() as connection:
+            result = await connection.execute(
                 text(
                     "SELECT column_name FROM information_schema.columns "
                     "WHERE table_name = 'users'"
                 )
             )
-        }
-    assert {"id", "identifier", "password_hash", "created_at"} <= user_columns
+            user_columns = {row[0] for row in result}
+        assert {"id", "identifier", "password_hash", "created_at"} <= user_columns
+    finally:
+        await engine.dispose()
 
     subprocess.run([*command, "downgrade", "base"], check=True, env=env)
     subprocess.run([*command, "upgrade", "head"], check=True, env=env)
