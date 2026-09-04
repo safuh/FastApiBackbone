@@ -42,8 +42,19 @@ class Settings(BaseSettings):
     log_json: bool = False
     cors_origins: list[str] = Field(default_factory=list)
     cors_allow_credentials: bool = False
-    cors_allow_methods: list[str] = Field(default_factory=lambda: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
-    cors_allow_headers: list[str] = Field(default_factory=lambda: ["Authorization", "Content-Type", "X-Request-ID"])
+    cors_allow_methods: list[str] = Field(
+        default_factory=lambda: [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE",
+            "OPTIONS",
+        ]
+    )
+    cors_allow_headers: list[str] = Field(
+        default_factory=lambda: ["Authorization", "Content-Type", "X-Request-ID"]
+    )
 
     @model_validator(mode="after")
     def validate_profile(self) -> "Settings":
