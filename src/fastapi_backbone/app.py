@@ -1,9 +1,12 @@
 """Application factory and composition root."""
 
+from typing import cast
+
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.types import ExceptionHandler
 
 from .api.router import api_router
 from .core.config import Settings, get_settings
@@ -46,9 +49,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             allow_headers=resolved.cors_allow_headers,
         )
 
-    app.add_exception_handler(BackboneError, backbone_error_handler)
-    app.add_exception_handler(RequestValidationError, validation_error_handler)
-    app.add_exception_handler(StarletteHTTPException, http_error_handler)
+    app.add_exception_handler(
+        BackboneError,
+        cast(ExceptionHandler, backbone_error_handler),
+    )
+    app.add_exception_handler(
+        RequestValidationError,
+        cast(ExceptionHandler, validation_error_handler),
+    )
+    app.add_exception_handler(
+        StarletteHTTPException,
+        cast(ExceptionHandler, http_error_handler),
+    )
     app.add_exception_handler(Exception, unhandled_error_handler)
 
     app.include_router(api_router, prefix=resolved.api_prefix)
