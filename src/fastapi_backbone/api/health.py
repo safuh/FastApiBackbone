@@ -5,6 +5,8 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from starlette.responses import JSONResponse
 
+from ..core.config import Settings
+
 router = APIRouter(prefix="/health", tags=["health"])
 
 
@@ -15,7 +17,7 @@ class HealthResponse(BaseModel):
     environment: str
 
 
-def _response(settings: object, state: str) -> HealthResponse:
+def _response(settings: Settings, state: str) -> HealthResponse:
     return HealthResponse(
         status=state,
         service=settings.app_name,
@@ -30,10 +32,10 @@ async def live(request: Request) -> HealthResponse:
     return _response(request.app.state.settings, "ok")
 
 
-@router.get("/ready", response_model=HealthResponse)
+@router.get("/ready", response_model=HealthResponse | None)
 async def ready(request: Request) -> HealthResponse | JSONResponse:
     """Readiness check; verifies startup completed and the database is reachable."""
-    settings = request.app.state.settings
+    settings: Settings = request.app.state.settings
     if not getattr(request.app.state, "startup_complete", False):
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
