@@ -32,7 +32,7 @@ async def live(request: Request) -> HealthResponse:
     return _response(request.app.state.settings, "ok")
 
 
-@router.get("/ready", response_model=HealthResponse | None)
+@router.get("/ready", response_model=HealthResponse)
 async def ready(request: Request) -> HealthResponse | JSONResponse:
     """Readiness check; verifies startup completed and the database is reachable."""
     settings: Settings = request.app.state.settings
