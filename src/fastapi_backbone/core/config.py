@@ -1,51 +1,78 @@
 """Typed, environment-driven application configuration."""
 
+from enum import StrEnum
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class Environment(StrEnum):
+    DEVELOPMENT = "development"
+    TEST = "test"
+    PRODUCTION = "production"
+
+
 class Settings(BaseSettings):
-    """Runtime settings loaded from environment variables and .env."""
+    """Runtime configuration with explicit development/test/production profiles.
+
+    Environment variables are the final override layer. The ``environment`` field
+    selects the profile defaults, while explicit values always win.
+    """
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
+        validate_default=True,
     )
 
     app_name: str = Field(default="FastAPI Backbone", min_length=1)
     app_version: str = "0.1.0"
-    environment: str = "development"
+    environment: Environment = Environment.DEVELOPMENT
     debug: bool = False
     api_prefix: str = "/api"
     database_url: str = "sqlite+aiosqlite:///./backbone.db"
     database_echo: bool = False
     database_pool_size: int = Field(default=5, ge=1)
     database_max_overflow: int = Field(default=10, ge=0)
+    database_pool_pre_ping: bool = True
     log_level: str = "INFO"
     log_json: bool = False
     cors_origins: list[str] = Field(default_factory=list)
     cors_allow_credentials: bool = False
-    cors_allow_methods: list[str] = Field(
-        default_factory=lambda: [
-            "GET",
-            "POST",
-            "PUT",
-            "PATCH",
-            "DELETE",
-            "OPTIONS",
-        ]
-    )
-    cors_allow_headers: list[str] = Field(
-        default_factory=lambda: [
-            "Authorization",
-            "Content-Type",
-            "X-Request-ID",
-        ]
-    )
+    cors_allow_methods: list[str] = Field(default_factory=lambda: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"])
+    cors_allow_headers: list[str] = Field(default_factory=lambda: ["Authorization", "Content-Type", "X-Request-ID"])
+
+    @model_validator(mode="after")
+    def validate_profile(self) -> "Settings":
+        if self.environment is Environment.PRODUCTION:
+            if self.debug:
+                raise ValueError("debug must be false in production")
+            if not self.database_url.startswith("postgresql+asyncpg://"):
+                raise ValueError("production requires a PostgreSQL asyncpg DATABASE_URL")
+            self.log_json = True
+        if self.environment is Environment.TEST:
+            self.debug = False
+        return self
+
+    @classmethod
+    def for_profile(cls, profile: Environment | str) -> "Settings":
+        """Build deterministic settings for tests, local development, or production."""
+        environment = Environment(profile)
+        defaults: dict[str, object] = {"environment": environment}
+        if environment is Environment.TEST:
+            defaults.update(
+                database_url="sqlite+aiosqlite:///:memory:",
+                log_json=False,
+            )
+        elif environment is Environment.PRODUCTION:
+            defaults.update(
+                database_url="postgresql+asyncpg://backbone:backbone@localhost:5432/backbone",
+                log_json=True,
+            )
+        return cls(**defaults)
 
 
 @lru_cache(maxsize=1)
