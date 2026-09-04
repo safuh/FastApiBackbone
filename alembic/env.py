@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from fastapi_backbone.core.config import get_settings
 from fastapi_backbone.core.database import Base
+from fastapi_backbone.identity import User  # noqa: F401
 
 config = context.config
 settings = get_settings()
