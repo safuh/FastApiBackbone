@@ -33,15 +33,25 @@ class TokenService:
         token_type: str = "access",
         claims: dict[str, Any] | None = None,
     ) -> str:
+        if not subject:
+            raise ValueError("JWT subject is required")
+        if expires_in <= timedelta(0):
+            raise ValueError("JWT expires_in must be positive")
+        if not token_type:
+            raise ValueError("JWT token_type is required")
+
         now = datetime.now(UTC)
-        payload: dict[str, Any] = {
-            "sub": subject,
-            "iat": now,
-            "exp": now + expires_in,
-            "type": token_type,
-        }
-        if claims:
-            payload.update(claims)
+        payload: dict[str, Any] = dict(claims or {})
+        # These claims define the token's security semantics and cannot be
+        # overridden by application-provided custom claims.
+        payload.update(
+            {
+                "sub": subject,
+                "iat": now,
+                "exp": now + expires_in,
+                "type": token_type,
+            }
+        )
         return jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
 
     def decode(self, token: str, *, expected_type: str | None = None) -> dict[str, Any]:
