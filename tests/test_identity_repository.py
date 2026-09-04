@@ -1,5 +1,5 @@
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from fastapi_backbone.auth import PasswordHasher
 from fastapi_backbone.core.config import Settings
@@ -7,7 +7,7 @@ from fastapi_backbone.core.database import create_engine, create_session_factory
 from fastapi_backbone.identity import User, UserCredentialRepository
 
 
-async def _session() -> tuple[object, object, AsyncSession]:
+async def _session() -> tuple[object, async_sessionmaker[AsyncSession], AsyncSession]:
     engine = create_engine(Settings.for_profile("test"))
     factory = create_session_factory(engine)
     async with engine.begin() as connection:
@@ -40,7 +40,10 @@ async def test_user_credential_repository_returns_credentials() -> None:
 async def test_user_credential_repository_returns_none_for_unknown_identifier() -> None:
     engine, _, session = await _session()
     try:
-        assert await UserCredentialRepository(session).get_by_identifier("missing@example.com") is None
+        assert (
+            await UserCredentialRepository(session).get_by_identifier("missing@example.com")
+            is None
+        )
     finally:
         await session.close()
         await engine.dispose()
