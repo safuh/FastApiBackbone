@@ -24,4 +24,4 @@ class PasswordHasher:
 
     def needs_rehash(self, password_hash: str) -> bool:
         """Return whether a stored hash should be upgraded on successful login."""
-        return self._hasher.check_needs_rehash(password_hash)
+        return self._hasher.needs_rehash(password_hash)
