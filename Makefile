@@ -30,4 +30,4 @@ docker-down:
 	docker compose -f docker/compose.yml down
 
 docker-test:
-	./scripts/docker-smoke.sh
+	bash scripts/docker-smoke.sh
