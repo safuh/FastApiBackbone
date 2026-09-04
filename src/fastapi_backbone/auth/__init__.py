@@ -2,6 +2,7 @@
 
 from .login import LoginRequest, LoginResponse, LoginService
 from .passwords import PasswordHasher
+from .refresh import RefreshResult, RefreshTokenRecord, RefreshTokenService, RefreshTokenStore
 from .service import (
     AuthenticationError,
     AuthenticationResult,
@@ -21,6 +22,10 @@ __all__ = [
     "LoginResponse",
     "LoginService",
     "PasswordHasher",
+    "RefreshResult",
+    "RefreshTokenRecord",
+    "RefreshTokenService",
+    "RefreshTokenStore",
     "TokenError",
     "TokenService",
 ]
