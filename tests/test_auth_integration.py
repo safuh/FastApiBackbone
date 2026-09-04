@@ -104,9 +104,18 @@ async def test_login_propagates_password_rehash_signal(monkeypatch: pytest.Monke
 
 def test_token_service_rejects_expired_and_wrong_type_tokens() -> None:
     service = TokenService("x" * 32)
+    expired = jwt.encode(
+        {
+            "sub": "user-123",
+            "iat": datetime.now(UTC) - timedelta(minutes=2),
+            "exp": datetime.now(UTC) - timedelta(minutes=1),
+            "type": "access",
+        },
+        service.secret_key,
+        algorithm=service.algorithm,
+    )
 
-    expired = service.create("user-123", timedelta(minutes=-1), token_type="access")
-    with pytest.raises(ValueError, match="JWT expires_in must be positive"):
+    with pytest.raises(TokenError, match="Invalid or expired token"):
         service.decode(expired, expected_type="access")
 
     refresh = service.create("user-123", timedelta(minutes=5), token_type="refresh")
