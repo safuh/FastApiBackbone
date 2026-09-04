@@ -83,6 +83,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Minimum secret length guard.
 - [x] Password hashing with a modern password-hashing library.
 - [x] Authentication service layer with persistence-independent credential lookup and access-token issuance.
+- [x] Application-level login use-case contract with transport-neutral request/result types.
 - [ ] Login/register/refresh/logout HTTP/application flows.
 - [ ] Refresh-token rotation and revocation.
 - [ ] User persistence model as an optional identity module.
