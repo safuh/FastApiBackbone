@@ -3,7 +3,12 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi_backbone.core.config import Settings
-from fastapi_backbone.core.database import UnitOfWork, create_engine, create_session_factory, session_scope
+from fastapi_backbone.core.database import (
+    UnitOfWork,
+    create_engine,
+    create_session_factory,
+    session_scope,
+)
 
 
 @pytest.mark.asyncio
@@ -12,7 +17,9 @@ async def test_session_scope_commits() -> None:
     factory = create_session_factory(engine)
     try:
         async with engine.begin() as connection:
-            await connection.execute(text("CREATE TABLE items (id INTEGER PRIMARY KEY, name TEXT)"))
+            await connection.execute(
+                text("CREATE TABLE items (id INTEGER PRIMARY KEY, name TEXT)")
+            )
         async with session_scope(factory) as session:
             await session.execute(text("INSERT INTO items (name) VALUES ('one')"))
         async with factory() as session:
@@ -28,11 +35,15 @@ async def test_unit_of_work_rolls_back_on_error() -> None:
     factory = create_session_factory(engine)
     try:
         async with engine.begin() as connection:
-            await connection.execute(text("CREATE TABLE items (id INTEGER PRIMARY KEY, name TEXT)"))
+            await connection.execute(
+                text("CREATE TABLE items (id INTEGER PRIMARY KEY, name TEXT)")
+            )
         with pytest.raises(RuntimeError):
             async with UnitOfWork(factory) as uow:
                 assert isinstance(uow.session, AsyncSession)
-                await uow.session.execute(text("INSERT INTO items (name) VALUES ('one')"))
+                await uow.session.execute(
+                    text("INSERT INTO items (name) VALUES ('one')")
+                )
                 raise RuntimeError("boom")
         async with factory() as session:
             result = await session.execute(text("SELECT COUNT(*) FROM items"))
