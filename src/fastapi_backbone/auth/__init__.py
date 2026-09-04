@@ -1,5 +1,6 @@
 """Authentication primitives and extension points."""
 
+from .login import LoginRequest, LoginResponse, LoginService
 from .passwords import PasswordHasher
 from .service import (
     AuthenticationError,
@@ -16,6 +17,9 @@ __all__ = [
     "AuthenticationService",
     "CredentialStore",
     "Credentials",
+    "LoginRequest",
+    "LoginResponse",
+    "LoginService",
     "PasswordHasher",
     "TokenError",
     "TokenService",
