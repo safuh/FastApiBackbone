@@ -9,7 +9,6 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
-
 _REQUEST_ID_HEADER = "X-Request-ID"
 log = structlog.get_logger(__name__)
 
@@ -31,9 +30,7 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
-        request_id = _valid_request_id(
-            request.headers.get(_REQUEST_ID_HEADER)
-        ) or str(uuid4())
+        request_id = _valid_request_id(request.headers.get(_REQUEST_ID_HEADER)) or str(uuid4())
         request.state.request_id = request_id
         structlog.contextvars.bind_contextvars(request_id=request_id)
         try:
