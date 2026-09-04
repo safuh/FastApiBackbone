@@ -15,7 +15,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 ### Runtime contract
 
 - [x] Canonical development command: `make run` / `uv run uvicorn fastapi_backbone.app:create_app --factory --reload`
-- [x] Canonical production command: `make prod` / `uv run uvicorn fastapi_backbone.app:create_app --factory --host 0.0.0.0 --port 8000
+- [x] Canonical production command: `make prod` / `uv run uvicorn fastapi_backbone.app:create_app --factory --host 0.0.0.0 --port 8000`
 - [x] Application factory at `fastapi_backbone.app:create_app`
 - [x] Explicit configuration profiles: `development`, `test`, `production`
 - [x] Production rejects debug mode and non-PostgreSQL database URLs
@@ -109,7 +109,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 
 ## Phase 5 — Flutter client
 
-**Status: [ ] Pending
+**Status: [ ] Pending**
 
 - [ ] Flutter application template.
 - [ ] Environment configuration.
