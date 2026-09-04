@@ -22,14 +22,13 @@ class InMemoryRefreshTokenStore:
         record = self.records.get(token_id)
         if record is None or record.revoked:
             return None
-        revoked = RefreshTokenRecord(
+        self.records[token_id] = RefreshTokenRecord(
             record.token_id,
             record.subject,
             record.expires_in,
             revoked=True,
         )
-        self.records[token_id] = revoked
-        return revoked
+        return record
 
 
 @pytest.fixture
