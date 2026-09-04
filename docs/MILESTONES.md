@@ -75,14 +75,15 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 
 ## Phase 3 — Identity & JWT
 
-**Status: [~] In progress**
+**Status: [~] In progress; authentication service layer implemented and awaiting verification**
 
 - [x] Signed JWT token service.
 - [x] Expiration and token-type validation.
 - [x] Subject validation.
 - [x] Minimum secret length guard.
-- [ ] Password hashing with a modern password-hashing library.
-- [ ] Login/register/refresh/logout flows.
+- [x] Password hashing with a modern password-hashing library.
+- [~] Authentication service layer with persistence-independent credential lookup and access-token issuance.
+- [ ] Login/register/refresh/logout HTTP/application flows.
 - [ ] Refresh-token rotation and revocation.
 - [ ] User persistence model as an optional identity module.
 - [ ] RBAC and OAuth2 scopes.
