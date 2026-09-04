@@ -6,8 +6,6 @@ Revises:
 
 from collections.abc import Sequence
 
-from alembic import op
-
 revision: str = "0001_foundation"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
