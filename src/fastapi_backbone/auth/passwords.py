@@ -6,6 +6,7 @@ must never persist or log plaintext passwords.
 """
 
 from pwdlib import PasswordHash
+from pwdlib.exceptions import UnknownHashError
 
 
 class PasswordHasher:
@@ -20,7 +21,10 @@ class PasswordHasher:
 
     def verify(self, password: str, password_hash: str) -> bool:
         """Return whether ``password`` matches the encoded hash."""
-        return self._hasher.verify(password, password_hash)
+        try:
+            return self._hasher.verify(password, password_hash)
+        except UnknownHashError:
+            return False
 
     def needs_rehash(self, password_hash: str) -> bool:
         """Return whether a stored hash should be upgraded on successful login."""
