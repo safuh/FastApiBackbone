@@ -84,12 +84,12 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Password hashing with a modern password-hashing library.
 - [x] Authentication service layer with persistence-independent credential lookup and access-token issuance.
 - [x] Application-level login use-case contract with transport-neutral request/result types.
-- [~] User persistence model as an optional identity module; awaiting CI verification.
+- [x] User persistence model as an optional identity module.
 - [ ] Login/register/refresh/logout HTTP/application flows.
 - [ ] Refresh-token rotation and revocation.
 - [ ] RBAC and OAuth2 scopes.
 - [ ] Rate limiting and abuse controls.
-- [ ] Security-focused integration tests.
+- [~] Security-focused integration tests; awaiting CI verification.
 - [ ] Threat model and deployment guidance.
 
 **Acceptance:** authentication has documented security properties, automated abuse/security tests, and safe production defaults.
