@@ -1,5 +1,6 @@
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 
+import jwt
 import pytest
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
@@ -26,6 +27,17 @@ async def _session() -> tuple[AsyncEngine, async_sessionmaker[AsyncSession], Asy
     return engine, factory, session
 
 
+def _login_service(session: AsyncSession, hasher: PasswordHasher) -> LoginService:
+    return LoginService(
+        AuthenticationService(
+            UserCredentialRepository(session),
+            hasher,
+            TokenService("x" * 32),
+            timedelta(minutes=15),
+        )
+    )
+
+
 @pytest.mark.asyncio
 async def test_login_authenticates_persisted_user_and_issues_access_token() -> None:
     engine, _, session = await _session()
@@ -35,20 +47,13 @@ async def test_login_authenticates_persisted_user_and_issues_access_token() -> N
         session.add(user)
         await session.commit()
 
-        authentication = AuthenticationService(
-            UserCredentialRepository(session),
-            hasher,
-            TokenService("x" * 32),
-            timedelta(minutes=15),
-        )
-        login = LoginService(authentication)
-
+        login = _login_service(session, hasher)
         result = await login.login(LoginRequest("alice@example.com", "secret"))
 
         assert result.subject == user.id
         assert result.access_token
         assert not result.password_needs_rehash
-        payload = authentication.token_service.decode(
+        payload = login.authentication_service.token_service.decode(
             result.access_token, expected_type="access"
         )
         assert payload["sub"] == user.id
@@ -64,14 +69,7 @@ async def test_login_keeps_unknown_and_wrong_password_failures_generic() -> None
         hasher = PasswordHasher()
         session.add(User(identifier="alice@example.com", password_hash=hasher.hash("secret")))
         await session.commit()
-        login = LoginService(
-            AuthenticationService(
-                UserCredentialRepository(session),
-                hasher,
-                TokenService("x" * 32),
-                timedelta(minutes=15),
-            )
-        )
+        login = _login_service(session, hasher)
 
         for request in (
             LoginRequest("missing@example.com", "secret"),
@@ -84,11 +82,31 @@ async def test_login_keeps_unknown_and_wrong_password_failures_generic() -> None
         await engine.dispose()
 
 
+@pytest.mark.asyncio
+async def test_login_propagates_password_rehash_signal(monkeypatch: pytest.MonkeyPatch) -> None:
+    engine, _, session = await _session()
+    try:
+        hasher = PasswordHasher()
+        user = User(identifier="alice@example.com", password_hash=hasher.hash("secret"))
+        session.add(user)
+        await session.commit()
+        monkeypatch.setattr(hasher, "needs_rehash", lambda password_hash: True)
+
+        result = await _login_service(session, hasher).login(
+            LoginRequest("alice@example.com", "secret")
+        )
+
+        assert result.password_needs_rehash
+    finally:
+        await session.close()
+        await engine.dispose()
+
+
 def test_token_service_rejects_expired_and_wrong_type_tokens() -> None:
     service = TokenService("x" * 32)
 
-    expired = service.create("user-123", timedelta(microseconds=1), token_type="access")
-    with pytest.raises(TokenError, match="Invalid or expired token"):
+    expired = service.create("user-123", timedelta(minutes=-1), token_type="access")
+    with pytest.raises(ValueError, match="JWT expires_in must be positive"):
         service.decode(expired, expected_type="access")
 
     refresh = service.create("user-123", timedelta(minutes=5), token_type="refresh")
@@ -96,8 +114,15 @@ def test_token_service_rejects_expired_and_wrong_type_tokens() -> None:
         service.decode(refresh, expected_type="access")
 
 
-def test_token_service_rejects_missing_subject() -> None:
+def test_token_service_rejects_missing_subject_and_malformed_tokens() -> None:
     service = TokenService("x" * 32)
-    token = service.create("user-123", timedelta(minutes=5), token_type="access")
-    payload = service.decode(token, expected_type="access")
-    assert payload["sub"] == "user-123"
+    token = jwt.encode(
+        {"exp": datetime.now(UTC) + timedelta(minutes=5), "type": "access"},
+        service.secret_key,
+        algorithm=service.algorithm,
+    )
+
+    with pytest.raises(TokenError, match="Token subject is required"):
+        service.decode(token, expected_type="access")
+    with pytest.raises(TokenError, match="Invalid or expired token"):
+        service.decode("not-a-jwt", expected_type="access")
