@@ -5,8 +5,8 @@ from .service import (
     AuthenticationError,
     AuthenticationResult,
     AuthenticationService,
-    CredentialStore,
     Credentials,
+    CredentialStore,
 )
 from .tokens import TokenError, TokenService
 
