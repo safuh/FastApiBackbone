@@ -8,8 +8,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN addgroup --system app && adduser --system --ingroup app app
 WORKDIR /app
 
-COPY pyproject.toml README.md ./
+COPY pyproject.toml README.md alembic.ini ./
 COPY src ./src
+COPY alembic ./alembic
 
 RUN pip install --upgrade pip \
     && pip install . \
