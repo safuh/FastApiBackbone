@@ -1,5 +1,5 @@
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from fastapi_backbone.auth import PasswordHasher
 from fastapi_backbone.core.config import Settings
@@ -7,7 +7,7 @@ from fastapi_backbone.core.database import create_engine, create_session_factory
 from fastapi_backbone.identity import User, UserCredentialRepository
 
 
-async def _session() -> tuple[object, async_sessionmaker[AsyncSession], AsyncSession]:
+async def _session() -> tuple[AsyncEngine, async_sessionmaker[AsyncSession], AsyncSession]:
     engine = create_engine(Settings.for_profile("test"))
     factory = create_session_factory(engine)
     async with engine.begin() as connection:
