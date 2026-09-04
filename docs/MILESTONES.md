@@ -109,7 +109,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 
 ## Phase 5 — Flutter client
 
-**Status: [ ] Pending
+**Status: [ ] Pending**
 
 - [ ] Flutter application template.
 - [ ] Environment configuration.
