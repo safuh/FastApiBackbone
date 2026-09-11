@@ -59,15 +59,16 @@ class RefreshTokenService:
         self.access_token_lifetime = access_token_lifetime
         self.refresh_token_lifetime = refresh_token_lifetime
 
-    async def issue(self, subject: str) -> RefreshResult:
-        """Issue an access token and a persisted refresh token."""
+    async def issue(self, subject: str, access_token: str | None = None) -> RefreshResult:
+        """Issue a persisted refresh token and, when needed, an access token."""
         token_id = uuid4()
         await self.refresh_token_store.create(
             RefreshTokenRecord(token_id, subject, self.refresh_token_lifetime)
         )
         return RefreshResult(
             subject=subject,
-            access_token=self.token_service.create(
+            access_token=access_token
+            or self.token_service.create(
                 subject, self.access_token_lifetime, token_type="access"
             ),
             refresh_token=self.token_service.create(
