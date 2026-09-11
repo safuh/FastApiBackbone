@@ -27,6 +27,9 @@ class RefreshTokenStore(Protocol):
     async def consume(self, token_id: UUID, subject: str) -> RefreshTokenRecord | None:
         """Atomically consume a refresh-token record for its subject."""
 
+    async def revoke(self, token_id: UUID) -> bool:
+        """Revoke a refresh-token record without deleting its audit state."""
+
 
 @dataclass(frozen=True, slots=True)
 class RefreshResult:
@@ -88,3 +91,12 @@ class RefreshTokenService:
         if record is None or record.revoked:
             raise TokenError("Invalid refresh token")
         return await self.issue(record.subject)
+
+    async def revoke(self, refresh_token: str) -> bool:
+        """Revoke a refresh token without exposing whether it was previously valid."""
+        try:
+            payload = self.token_service.decode(refresh_token, expected_type="refresh")
+            token_id = UUID(payload["jti"])
+        except (TokenError, KeyError, ValueError, TypeError) as exc:
+            raise TokenError("Invalid refresh token") from exc
+        return await self.refresh_token_store.revoke(token_id)
