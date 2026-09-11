@@ -4,7 +4,6 @@ from datetime import timedelta
 
 from fastapi_backbone.auth.tokens import TokenError, TokenService
 
-
 SECRET = "test-secret-key-that-is-at-least-32-bytes"
 
 
