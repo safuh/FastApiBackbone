@@ -1,7 +1,8 @@
 """Security regression tests for authentication boundaries."""
 
-import pytest
 from datetime import timedelta
+
+import pytest
 
 from fastapi_backbone.auth.tokens import TokenError, TokenService
 
