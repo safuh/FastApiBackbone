@@ -101,7 +101,7 @@ def test_structured_audit_sink_does_not_include_credentials_or_tokens(capsys: An
     sink = StructuredAuditSink()
     sink.emit(AuditEvent("login", "success", "user-123"))
 
-    output = capsys.readouterr().err
+    output = capsys.readouterr().out
     assert "identity_audit" in output
     assert "login" in output
     assert "success" in output
