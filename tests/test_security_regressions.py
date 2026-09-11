@@ -2,7 +2,7 @@
 
 from datetime import timedelta
 
-from fastapi_backbone.auth.tokens import TokenError, TokenService
+from fastapi_backbone.auth.tokens import TokenError, TokenService  # noqa: I001
 
 
 SECRET = "test-secret-key-that-is-at-least-32-bytes"
