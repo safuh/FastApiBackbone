@@ -39,7 +39,11 @@ class RegistrationResponse:
 class RegistrationService:
     """Validate registration input, hash the password, and persist the identity."""
 
-    def __init__(self, user_store: UserRegistrationStore, password_hasher: PasswordHasher) -> None:
+    def __init__(
+        self,
+        user_store: UserRegistrationStore,
+        password_hasher: PasswordHasher,
+    ) -> None:
         self.user_store = user_store
         self.password_hasher = password_hasher
 
@@ -48,12 +52,8 @@ class RegistrationService:
         if not request.identifier or not request.password:
             raise RegistrationError("Identifier and password are required")
 
-        try:
-            subject = await self.user_store.create(
-                request.identifier,
-                self.password_hasher.hash(request.password),
-            )
-        except IdentifierAlreadyExistsError:
-            raise
-
+        subject = await self.user_store.create(
+            request.identifier,
+            self.password_hasher.hash(request.password),
+        )
         return RegistrationResponse(subject=subject)
