@@ -1,9 +1,10 @@
-"""Persistence adapter for authentication credentials."""
+"""Persistence adapters for the optional identity module."""
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from fastapi_backbone.auth import Credentials
+from fastapi_backbone.auth import Credentials, IdentifierAlreadyExistsError
 
 from .models import User
 
@@ -23,3 +24,14 @@ class UserCredentialRepository:
         if row is None:
             return None
         return Credentials(subject=row.id, password_hash=row.password_hash)
+
+    async def create(self, identifier: str, password_hash: str) -> str:
+        """Persist a new user and return its generated subject identifier."""
+        user = User(identifier=identifier, password_hash=password_hash)
+        self.session.add(user)
+        try:
+            await self.session.flush()
+        except IntegrityError as exc:
+            await self.session.rollback()
+            raise IdentifierAlreadyExistsError("Identifier is already registered") from exc
+        return user.id
