@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 
 import pytest
@@ -29,8 +30,8 @@ async def test_auth_http_uses_sqlalchemy_composition(tmp_path: Path) -> None:
         return create_sqlalchemy_auth_application(
             session,
             secret_key="x" * 32,
-            access_token_lifetime=__import__("datetime").timedelta(minutes=15),
-            refresh_token_lifetime=__import__("datetime").timedelta(days=7),
+            access_token_lifetime=timedelta(minutes=15),
+            refresh_token_lifetime=timedelta(days=7),
         )
 
     with TestClient(create_app(settings, application_factory)) as client:
