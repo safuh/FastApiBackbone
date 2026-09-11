@@ -2,8 +2,6 @@
 
 from datetime import timedelta
 
-import pytest
-
 from fastapi_backbone.auth.tokens import TokenError, TokenService
 
 
@@ -37,8 +35,12 @@ def test_tampered_token_is_rejected() -> None:
     token = service.create("user-123", timedelta(minutes=15))
     tampered_token = token[:-1] + ("A" if token[-1] != "A" else "B")
 
-    with pytest.raises(TokenError, match="Invalid or expired token"):
+    try:
         service.decode(tampered_token)
+    except TokenError as exc:
+        assert str(exc) == "Invalid or expired token"
+    else:
+        raise AssertionError("Tampered token was accepted")
 
 
 def test_refresh_token_cannot_be_accepted_as_access_token() -> None:
@@ -49,18 +51,30 @@ def test_refresh_token_cannot_be_accepted_as_access_token() -> None:
         token_type="refresh",
     )
 
-    with pytest.raises(TokenError, match="Unexpected token type"):
+    try:
         service.decode(token, expected_type="access")
+    except TokenError as exc:
+        assert str(exc) == "Unexpected token type"
+    else:
+        raise AssertionError("Refresh token was accepted as an access token")
 
 
 def test_access_token_cannot_be_accepted_as_refresh_token() -> None:
     service = TokenService(SECRET)
     token = service.create("user-123", timedelta(minutes=15), token_type="access")
 
-    with pytest.raises(TokenError, match="Unexpected token type"):
+    try:
         service.decode(token, expected_type="refresh")
+    except TokenError as exc:
+        assert str(exc) == "Unexpected token type"
+    else:
+        raise AssertionError("Access token was accepted as a refresh token")
 
 
 def test_short_jwt_secret_is_rejected() -> None:
-    with pytest.raises(ValueError, match="at least 32 characters"):
+    try:
         TokenService("too-short")
+    except ValueError as exc:
+        assert str(exc) == "JWT secret must be at least 32 characters"
+    else:
+        raise AssertionError("Short JWT secret was accepted")
