@@ -75,7 +75,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 
 ## Phase 3 — Identity & JWT
 
-**Status: [~] In progress; authentication service layer and integration coverage verified**
+**Status: [~] In progress; authentication and refresh-token persistence/rotation verified**
 
 - [x] Signed JWT token service.
 - [x] Expiration and token-type validation.
@@ -86,8 +86,8 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Application-level login use-case contract with transport-neutral request/result types.
 - [x] User persistence model as an optional identity module.
 - [ ] Login/register/refresh/logout HTTP/application flows.
-- [~] Refresh-token rotation and revocation; awaiting CI verification.
-- [~] SQLAlchemy refresh-token persistence and migration; awaiting CI verification.
+- [x] Refresh-token rotation and revocation.
+- [x] SQLAlchemy refresh-token persistence and migration.
 - [ ] RBAC and OAuth2 scopes.
 - [ ] Rate limiting and abuse controls.
 - [x] Security-focused integration tests.
