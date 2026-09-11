@@ -3,14 +3,14 @@
 from collections.abc import Callable
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request, status
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Request, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from ..auth import (
     AuthenticationApplication,
     AuthenticationError,
+    IdentifierAlreadyExistsError,
     LoginRequest,
     RegistrationError,
     RegistrationRequest,
@@ -77,10 +77,11 @@ async def register(
             RegistrationRequest(identifier=body.identifier, password=body.password)
         )
         await session.commit()
+    except IdentifierAlreadyExistsError as exc:
+        await session.rollback()
+        raise BackboneError("identifier_exists", "Identifier is already registered", 409) from exc
     except RegistrationError as exc:
         await session.rollback()
-        if exc.__class__.__name__ == "IdentifierAlreadyExistsError":
-            raise BackboneError("identifier_exists", "Identifier is already registered", 409) from exc
         raise BackboneError("registration_error", str(exc)) from exc
     except Exception:
         await session.rollback()
@@ -147,7 +148,7 @@ async def logout(
     request: Request,
     body: TokenRequest,
     session: Annotated[AsyncSession, Depends(_session)],
-) -> JSONResponse:
+) -> Response:
     try:
         await _application(request, session).logout(body.refresh_token)
         await session.commit()
@@ -159,4 +160,4 @@ async def logout(
         raise
     finally:
         await session.close()
-    return JSONResponse(status_code=204, content=None)
+    return Response(status_code=204)
