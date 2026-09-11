@@ -40,6 +40,7 @@ def create_sqlalchemy_auth_application(
         credential_store=user_repository,
         password_hasher=hasher,
         token_service=token_service,
+        access_token_lifetime=access_token_lifetime,
     )
     registration_service = RegistrationService(
         user_store=user_repository,
