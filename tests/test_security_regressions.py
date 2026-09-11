@@ -1,8 +1,12 @@
 """Security regression tests for authentication boundaries."""
 
+# Ruff's import sorter misclassifies this test module's local package import.
+# Keep the import layout explicit and suppress only the import-order diagnostic.
+# ruff: noqa: I001
+
 from datetime import timedelta
 
-from fastapi_backbone.auth.tokens import TokenError, TokenService  # noqa: I001
+from fastapi_backbone.auth.tokens import TokenError, TokenService
 
 
 SECRET = "test-secret-key-that-is-at-least-32-bytes"
