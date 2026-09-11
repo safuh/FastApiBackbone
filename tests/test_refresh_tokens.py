@@ -59,7 +59,7 @@ async def test_access_token_cannot_be_used_for_refresh(
 async def test_refresh_subject_mismatch_is_rejected(
     service: RefreshTokenService,
 ) -> None:
-    issued = await service.issue("user-123")
+    await service.issue("user-123")
     token_id = next(iter(service.refresh_token_store.records))
     token = service.token_service.create(
         "attacker",
