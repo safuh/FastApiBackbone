@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [{name = "Safu Harry", email = "harrysafu@gmail.com"}]
-keywords = ["fastapi", "sqlalchemy", "alembic", "jwt", "flutter", "docker", "kubernetes", "backend", "scaffolding"]
+keywords = ["fastapi", "sqlalchemy", "alembic", "flutter", "docker", "kubernetes", "backend", "scaffolding"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -67,6 +67,7 @@ target-version = "py311"
 select = ["E", "F", "I", "B", "UP"]
 
 [tool.ruff.lint.isort]
+known-first-party = ["fastapi_backbone"]
 known-third-party = ["alembic"]
 
 [tool.mypy]
