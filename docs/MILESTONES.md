@@ -152,7 +152,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Correlation IDs propagated through responses and structured logging context.
 - [ ] OpenTelemetry integration point.
 - [ ] Metrics integration point.
-- [ ] Structured audit events for identity operations.
+- [x] Structured audit events for identity operations.
 - [x] Dependency vulnerability scanning.
 - [ ] Secret scanning.
 - [ ] SBOM/release provenance.
@@ -184,7 +184,6 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [ ] Flutter client integration verified.
 - [ ] Docker and Kubernetes paths verified.
 - [ ] Documentation reviewed end-to-end.
-- [ ] Release candidate feedback incorporated.
 
 ## Change-control rule
 
