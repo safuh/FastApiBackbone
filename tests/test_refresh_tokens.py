@@ -32,6 +32,19 @@ class InMemoryRefreshTokenStore:
         del self.records[token_id]
         return record
 
+    async def revoke(self, token_id: UUID) -> bool:
+        """Revoke a refresh-token record without deleting it."""
+        record = self.records.get(token_id)
+        if record is None or record.revoked:
+            return False
+        self.records[token_id] = RefreshTokenRecord(
+            token_id=record.token_id,
+            subject=record.subject,
+            expires_in=record.expires_in,
+            revoked=True,
+        )
+        return True
+
 
 @pytest.fixture
 def service() -> RefreshTokenService:
@@ -90,3 +103,26 @@ async def test_refresh_token_can_only_be_consumed_once(
     assert rotated.refresh_token != issued.refresh_token
     with pytest.raises(TokenError, match="Invalid refresh token"):
         await service.rotate(issued.refresh_token)
+
+
+@pytest.mark.asyncio
+async def test_refresh_token_can_be_revoked(
+    service: RefreshTokenService,
+) -> None:
+    issued = await service.issue("user-123")
+    token_id = next(iter(service.refresh_token_store.records))
+
+    assert await service.revoke(issued.refresh_token) is True
+    assert service.refresh_token_store.records[token_id].revoked is True
+    assert await service.revoke(issued.refresh_token) is False
+
+    with pytest.raises(TokenError, match="Invalid refresh token"):
+        await service.rotate(issued.refresh_token)
+
+
+@pytest.mark.asyncio
+async def test_revoke_rejects_malformed_refresh_token(
+    service: RefreshTokenService,
+) -> None:
+    with pytest.raises(TokenError, match="Invalid refresh token"):
+        await service.revoke("not-a-jwt")
