@@ -1,9 +1,11 @@
 """SQLAlchemy persistence for refresh-token rotation state."""
 
 from datetime import UTC, datetime, timedelta
+from typing import Any, cast
 from uuid import UUID
 
 from sqlalchemy import delete, select, update
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -45,15 +47,18 @@ class SqlAlchemyRefreshTokenStore(RefreshTokenStore):
     ) -> RefreshTokenRecord | None:
         """Atomically consume a valid, unexpired token for its subject."""
         now = datetime.now(UTC)
-        result = await self.session.execute(
-            update(RefreshToken)
-            .where(
-                RefreshToken.token_id == str(token_id),
-                RefreshToken.subject == subject,
-                RefreshToken.revoked.is_(False),
-                RefreshToken.expires_at > now,
-            )
-            .values(revoked=True)
+        result = cast(
+            CursorResult[Any],
+            await self.session.execute(
+                update(RefreshToken)
+                .where(
+                    RefreshToken.token_id == str(token_id),
+                    RefreshToken.subject == subject,
+                    RefreshToken.revoked.is_(False),
+                    RefreshToken.expires_at > now,
+                )
+                .values(revoked=True)
+            ),
         )
         if result.rowcount != 1:
             return None
@@ -71,19 +76,25 @@ class SqlAlchemyRefreshTokenStore(RefreshTokenStore):
 
     async def revoke(self, token_id: UUID) -> bool:
         """Revoke a refresh token without deleting its audit state."""
-        result = await self.session.execute(
-            update(RefreshToken)
-            .where(
-                RefreshToken.token_id == str(token_id),
-                RefreshToken.revoked.is_(False),
-            )
-            .values(revoked=True)
+        result = cast(
+            CursorResult[Any],
+            await self.session.execute(
+                update(RefreshToken)
+                .where(
+                    RefreshToken.token_id == str(token_id),
+                    RefreshToken.revoked.is_(False),
+                )
+                .values(revoked=True)
+            ),
         )
         return result.rowcount == 1
 
     async def delete(self, token_id: UUID) -> bool:
         """Delete a refresh-token record when retention is no longer required."""
-        result = await self.session.execute(
-            delete(RefreshToken).where(RefreshToken.token_id == str(token_id))
+        result = cast(
+            CursorResult[Any],
+            await self.session.execute(
+                delete(RefreshToken).where(RefreshToken.token_id == str(token_id))
+            ),
         )
         return result.rowcount == 1
