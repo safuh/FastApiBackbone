@@ -9,8 +9,8 @@ from fastapi_backbone.auth import (
     AuthenticationService,
     LoginService,
     PasswordHasher,
-    RegistrationService,
     RefreshTokenService,
+    RegistrationService,
     TokenService,
 )
 
