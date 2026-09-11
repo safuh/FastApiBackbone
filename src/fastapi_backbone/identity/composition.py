@@ -11,6 +11,7 @@ from fastapi_backbone.auth import (
     PasswordHasher,
     RefreshTokenService,
     RegistrationService,
+    StructuredAuditSink,
     TokenService,
 )
 
@@ -58,4 +59,5 @@ def create_sqlalchemy_auth_application(
         registration_service=registration_service,
         login_service=login_service,
         refresh_token_service=refresh_token_service,
+        audit_sink=StructuredAuditSink(),
     )

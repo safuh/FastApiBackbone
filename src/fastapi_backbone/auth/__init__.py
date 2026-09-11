@@ -1,6 +1,7 @@
 """Authentication primitives and extension points."""
 
 from .application import AuthenticationApplication
+from .audit import AuditEvent, AuditSink, NullAuditSink, StructuredAuditSink
 from .login import LoginRequest, LoginResponse, LoginService
 from .passwords import PasswordHasher
 from .refresh import RefreshResult, RefreshTokenRecord, RefreshTokenService, RefreshTokenStore
@@ -22,6 +23,8 @@ from .service import (
 from .tokens import TokenError, TokenService
 
 __all__ = [
+    "AuditEvent",
+    "AuditSink",
     "AuthenticationApplication",
     "AuthenticationError",
     "AuthenticationResult",
@@ -32,6 +35,7 @@ __all__ = [
     "LoginRequest",
     "LoginResponse",
     "LoginService",
+    "NullAuditSink",
     "PasswordHasher",
     "RefreshResult",
     "RefreshTokenRecord",
@@ -41,6 +45,7 @@ __all__ = [
     "RegistrationRequest",
     "RegistrationResponse",
     "RegistrationService",
+    "StructuredAuditSink",
     "TokenError",
     "TokenService",
     "UserRegistrationStore",
