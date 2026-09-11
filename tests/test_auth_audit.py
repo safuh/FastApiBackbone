@@ -1,5 +1,6 @@
 from datetime import timedelta
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 
@@ -97,17 +98,23 @@ async def test_authentication_failure_emits_event_without_identifier() -> None:
     assert sink.events == [AuditEvent("login", "failure")]
 
 
-def test_structured_audit_sink_does_not_include_credentials_or_tokens(capsys: Any) -> None:
+def test_structured_audit_sink_emits_only_non_sensitive_fields() -> None:
     sink = StructuredAuditSink()
+    logger = Mock()
+    sink._logger = logger
+
     sink.emit(AuditEvent("login", "success", "user-123"))
 
-    output = capsys.readouterr().out
-    assert "identity_audit" in output
-    assert "login" in output
-    assert "success" in output
-    assert "user-123" in output
-    assert "password" not in output
-    assert "refresh_token" not in output
+    logger.info.assert_called_once_with(
+        "identity_audit",
+        audit_action="login",
+        audit_outcome="success",
+        subject="user-123",
+    )
+    payload = logger.info.call_args.kwargs
+    assert "password" not in payload
+    assert "refresh_token" not in payload
+    assert "access_token" not in payload
 
 
 def test_token_service_remains_independent_of_audit_sink() -> None:
