@@ -5,7 +5,10 @@ from uuid import UUID
 
 import pytest
 
-from fastapi_backbone.auth.refresh import RefreshTokenService
+from fastapi_backbone.auth.refresh import (
+    RefreshTokenRecord,
+    RefreshTokenService,
+)
 from fastapi_backbone.auth.tokens import TokenError, TokenService
 
 
@@ -13,20 +16,21 @@ class InMemoryRefreshTokenStore:
     """Minimal refresh-token store used by application-level tests."""
 
     def __init__(self) -> None:
-        self.records: dict[UUID, object] = {}
+        self.records: dict[UUID, RefreshTokenRecord] = {}
 
-    async def save(self, record: object) -> None:
-        self.records[record.id] = record  # type: ignore[attr-defined]
+    async def create(self, record: RefreshTokenRecord) -> None:
+        """Persist a newly issued refresh-token record."""
+        self.records[record.token_id] = record
 
-    async def consume(self, token_id: UUID) -> object | None:
+    async def consume(
+        self, token_id: UUID, subject: str
+    ) -> RefreshTokenRecord | None:
+        """Consume a matching refresh-token record exactly once."""
         record = self.records.get(token_id)
-        if record is None or getattr(record, "consumed_at", None) is not None:
+        if record is None or record.revoked or record.subject != subject:
             return None
+        del self.records[token_id]
         return record
-
-    async def mark_consumed(self, token_id: UUID) -> None:
-        record = self.records[token_id]
-        record.consumed_at = object()  # type: ignore[attr-defined]
 
 
 @pytest.fixture
@@ -59,7 +63,7 @@ async def test_access_token_cannot_be_used_for_refresh(
 async def test_refresh_subject_mismatch_is_rejected(
     service: RefreshTokenService,
 ) -> None:
-    await service.issue("user-123")
+    issued = await service.issue("user-123")
     token_id = next(iter(service.refresh_token_store.records))
     token = service.token_service.create(
         "attacker",
@@ -70,3 +74,19 @@ async def test_refresh_subject_mismatch_is_rejected(
 
     with pytest.raises(TokenError, match="Invalid refresh token"):
         await service.rotate(token)
+    assert token_id in service.refresh_token_store.records
+    assert issued.subject == "user-123"
+
+
+@pytest.mark.asyncio
+async def test_refresh_token_can_only_be_consumed_once(
+    service: RefreshTokenService,
+) -> None:
+    issued = await service.issue("user-123")
+
+    rotated = await service.rotate(issued.refresh_token)
+
+    assert rotated.subject == "user-123"
+    assert rotated.refresh_token != issued.refresh_token
+    with pytest.raises(TokenError, match="Invalid refresh token"):
+        await service.rotate(issued.refresh_token)
