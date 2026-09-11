@@ -1,6 +1,6 @@
 """SQLAlchemy persistence for refresh-token rotation state."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import delete, select, update
@@ -30,7 +30,7 @@ class SqlAlchemyRefreshTokenStore(RefreshTokenStore):
 
     async def create(self, record: RefreshTokenRecord) -> None:
         """Persist a newly issued refresh-token record."""
-        expires_at = datetime.now(timezone.utc) + record.expires_in
+        expires_at = datetime.now(UTC) + record.expires_in
         self.session.add(
             RefreshToken(
                 token_id=str(record.token_id),
@@ -44,7 +44,7 @@ class SqlAlchemyRefreshTokenStore(RefreshTokenStore):
         self, token_id: UUID, subject: str
     ) -> RefreshTokenRecord | None:
         """Atomically consume a valid, unexpired token for its subject."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         result = await self.session.execute(
             update(RefreshToken)
             .where(
