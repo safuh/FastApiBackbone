@@ -75,7 +75,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 
 ## Phase 3 — Identity & JWT
 
-**Status: [~] In progress; core authentication lifecycle verified**
+**Status: [~] In progress; core authentication lifecycle and security contract verified**
 
 - [x] Signed JWT token service.
 - [x] Expiration and token-type validation.
@@ -91,7 +91,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [ ] RBAC and OAuth2 scopes.
 - [ ] Rate limiting and abuse controls.
 - [x] Security-focused integration tests.
-- [ ] Threat model and deployment guidance.
+- [x] Threat model and deployment guidance.
 
 **Acceptance:** authentication has documented security properties, automated abuse/security tests, and safe production defaults.
 
@@ -156,8 +156,8 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Dependency vulnerability scanning.
 - [ ] Secret scanning.
 - [ ] SBOM/release provenance.
-- [ ] Threat model review.
-- [ ] Security regression suite.
+- [x] Threat model review.
+- [x] Security regression suite.
 
 ## Phase 9 — Release candidate
 
