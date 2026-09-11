@@ -1,7 +1,5 @@
 """Security regression tests for authentication boundaries."""
 
-import base64
-import json
 from datetime import timedelta
 
 import pytest
@@ -37,16 +35,10 @@ def test_token_protects_security_claims_from_custom_claim_override() -> None:
 def test_tampered_token_is_rejected() -> None:
     service = TokenService(SECRET)
     token = service.create("user-123", timedelta(minutes=15))
-    header, _, signature = token.split(".")
-    tampered_payload = base64.urlsafe_b64encode(
-        json.dumps(
-            {"sub": "attacker", "iat": 0, "exp": 4102444800, "type": "access"},
-            separators=(",", ":"),
-        ).encode()
-    ).rstrip(b"=").decode()
+    tampered_token = token[:-1] + ("A" if token[-1] != "A" else "B")
 
     with pytest.raises(TokenError, match="Invalid or expired token"):
-        service.decode(f"{header}.{tampered_payload}.{signature}")
+        service.decode(tampered_token)
 
 
 def test_refresh_token_cannot_be_accepted_as_access_token() -> None:
