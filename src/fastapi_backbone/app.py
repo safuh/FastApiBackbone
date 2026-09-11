@@ -1,14 +1,17 @@
 """Application factory and composition root."""
 
+from collections.abc import Callable
 from typing import cast
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import ExceptionHandler
 
 from .api.router import api_router
+from .auth.application import AuthenticationApplication
 from .core.config import Settings, get_settings
 from .core.errors import (
     BackboneError,
@@ -21,12 +24,17 @@ from .core.lifespan import lifespan
 from .core.logging import configure_logging
 from .core.middleware import RequestContextMiddleware
 
+AuthApplicationFactory = Callable[[AsyncSession], AuthenticationApplication]
 
-def create_app(settings: Settings | None = None) -> FastAPI:
-    """Create a configured FastAPI application.
 
-    The factory is intentionally dependency-injectable so tests and consuming
-    applications can provide their own Settings instance.
+def create_app(
+    settings: Settings | None = None,
+    auth_application_factory: AuthApplicationFactory | None = None,
+) -> FastAPI:
+    """Create a configured FastAPI application with optional auth composition.
+
+    Authentication dependencies are supplied by the consuming application so
+    secrets, token lifetimes, and persistence remain explicit composition concerns.
     """
     resolved = settings or get_settings()
     configure_logging(resolved)
@@ -38,6 +46,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     app.state.settings = resolved
+    app.state.auth_application_factory = auth_application_factory
 
     app.add_middleware(RequestContextMiddleware)
     if resolved.cors_origins:
