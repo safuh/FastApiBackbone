@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from fastapi_backbone.auth import LoginRequest, RegistrationRequest, TokenError
+from fastapi_backbone.auth.tokens import TokenService
 from fastapi_backbone.core.database import Base, create_session_factory
 from fastapi_backbone.identity import (
     RefreshToken,
@@ -48,7 +49,9 @@ async def test_sqlalchemy_auth_composition_persists_full_lifecycle() -> None:
             await session.rollback()
 
             assert refreshed.subject == registration.subject
-            assert refreshed.access_token != login.access_token
+            assert TokenService("x" * 32).decode(
+                refreshed.access_token, expected_type="access"
+            )["sub"] == registration.subject
             assert refreshed.refresh_token != login.refresh_token
 
             assert await application.logout(refreshed.refresh_token)
