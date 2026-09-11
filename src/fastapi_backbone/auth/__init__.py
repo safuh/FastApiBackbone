@@ -1,8 +1,17 @@
 """Authentication primitives and extension points."""
 
+from .application import AuthenticationApplication
 from .login import LoginRequest, LoginResponse, LoginService
 from .passwords import PasswordHasher
 from .refresh import RefreshResult, RefreshTokenRecord, RefreshTokenService, RefreshTokenStore
+from .registration import (
+    IdentifierAlreadyExistsError,
+    RegistrationError,
+    RegistrationRequest,
+    RegistrationResponse,
+    RegistrationService,
+    UserRegistrationStore,
+)
 from .service import (
     AuthenticationError,
     AuthenticationResult,
@@ -13,11 +22,13 @@ from .service import (
 from .tokens import TokenError, TokenService
 
 __all__ = [
+    "AuthenticationApplication",
     "AuthenticationError",
     "AuthenticationResult",
     "AuthenticationService",
     "CredentialStore",
     "Credentials",
+    "IdentifierAlreadyExistsError",
     "LoginRequest",
     "LoginResponse",
     "LoginService",
@@ -26,6 +37,11 @@ __all__ = [
     "RefreshTokenRecord",
     "RefreshTokenService",
     "RefreshTokenStore",
+    "RegistrationError",
+    "RegistrationRequest",
+    "RegistrationResponse",
+    "RegistrationService",
     "TokenError",
     "TokenService",
+    "UserRegistrationStore",
 ]
