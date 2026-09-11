@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from .audit import AuditEvent, AuditSink, NullAuditSink
 from .login import LoginRequest, LoginService
 from .refresh import RefreshResult, RefreshTokenService
-from .registration import RegistrationRequest, RegistrationResponse, RegistrationService
+from .registration import RegistrationError, RegistrationRequest, RegistrationResponse, RegistrationService
 from .service import AuthenticationError
 from .tokens import TokenError
 
@@ -27,7 +27,7 @@ class AuthenticationApplication:
         """Register a new password-authenticated identity."""
         try:
             result = await self.registration_service.register(request)
-        except Exception:
+        except RegistrationError:
             self._audit("register", "failure")
             raise
         self._audit("register", "success", result.subject)
