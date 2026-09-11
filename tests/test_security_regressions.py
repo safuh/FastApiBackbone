@@ -1,8 +1,9 @@
 """Security regression tests for authentication boundaries."""
 
+import base64
+import json
 from datetime import timedelta
 
-import jwt
 import pytest
 
 from fastapi_backbone.auth.tokens import TokenError, TokenService
@@ -36,10 +37,13 @@ def test_token_protects_security_claims_from_custom_claim_override() -> None:
 def test_tampered_token_is_rejected() -> None:
     service = TokenService(SECRET)
     token = service.create("user-123", timedelta(minutes=15))
-    header, payload, signature = token.split(".")
-    tampered_payload = jwt.utils.base64url_encode(
-        b'{"sub":"attacker","iat":0,"exp":4102444800,"type":"access"}'
-    ).decode()
+    header, _, signature = token.split(".")
+    tampered_payload = base64.urlsafe_b64encode(
+        json.dumps(
+            {"sub": "attacker", "iat": 0, "exp": 4102444800, "type": "access"},
+            separators=(",", ":"),
+        ).encode()
+    ).rstrip(b"=").decode()
 
     with pytest.raises(TokenError, match="Invalid or expired token"):
         service.decode(f"{header}.{tampered_payload}.{signature}")
