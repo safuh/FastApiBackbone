@@ -1,9 +1,5 @@
 """Security regression tests for authentication boundaries."""
 
-# Ruff's import sorter misclassifies this test module's local package import.
-# Keep the import layout explicit and suppress only the import-order diagnostic.
-# ruff: noqa: I001
-
 from datetime import timedelta
 
 from fastapi_backbone.auth.tokens import TokenError, TokenService
@@ -79,6 +75,6 @@ def test_short_jwt_secret_is_rejected() -> None:
     try:
         TokenService("too-short")
     except ValueError as exc:
-        assert str(exc) == "JWT secret must be at least 32 characters"
+        assert str(exc) == "JWT secret_key must contain at least 32 characters"
     else:
         raise AssertionError("Short JWT secret was accepted")
