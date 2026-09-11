@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 import pytest
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from fastapi_backbone.auth import LoginRequest, RegistrationRequest, TokenError
@@ -63,7 +64,7 @@ async def test_sqlalchemy_auth_composition_persists_full_lifecycle() -> None:
             assert user.password_hash != "correct horse"
 
             refresh_rows = await session.execute(
-                __import__("sqlalchemy").select(RefreshToken).order_by(RefreshToken.token_id)
+                select(RefreshToken).order_by(RefreshToken.token_id)
             )
             assert len(refresh_rows.scalars().all()) == 2
     finally:
