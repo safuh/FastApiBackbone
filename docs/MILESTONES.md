@@ -10,7 +10,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 
 ## M1 — Core Foundation
 
-**Status: [~] Implemented; final verification is the release gate**
+**Status: [x] Complete and verified**
 
 ### Runtime contract
 
@@ -51,11 +51,11 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Docker Compose healthcheck
 - [x] Docker smoke-test script covering build, startup, health, readiness, and migration
 - [x] CI runs Python 3.11, 3.12, and 3.13
-- [ ] Final CI run is green on the branch
-- [ ] Final Docker smoke test is green in CI/local verification
-- [ ] Full mypy gate has zero application errors
+- [x] Final CI run is green on the branch
+- [x] Final Docker smoke test is green in CI/local verification
+- [x] Full mypy gate has zero application errors
 
-**M1 acceptance gate:** the final three verification items must be green before this milestone changes to `[x]`.
+**M1 acceptance gate:** all final verification requirements are green.
 
 ## Phase 2 — Database & migrations
 
@@ -75,7 +75,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 
 ## Phase 3 — Identity & JWT
 
-**Status: [~] In progress; authentication service layer and integration coverage verified**
+**Status: [~] In progress; core authentication lifecycle verified**
 
 - [x] Signed JWT token service.
 - [x] Expiration and token-type validation.
@@ -85,9 +85,9 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Authentication service layer with persistence-independent credential lookup and access-token issuance.
 - [x] Application-level login use-case contract with transport-neutral request/result types.
 - [x] User persistence model as an optional identity module.
-- [ ] Login/register/refresh/logout HTTP/application flows.
-- [~] Refresh-token rotation and revocation; awaiting CI verification.
-- [~] SQLAlchemy refresh-token persistence and migration; awaiting CI verification.
+- [x] Login/register/refresh/logout HTTP/application flows.
+- [x] Refresh-token rotation and revocation.
+- [x] SQLAlchemy refresh-token persistence and migration.
 - [ ] RBAC and OAuth2 scopes.
 - [ ] Rate limiting and abuse controls.
 - [x] Security-focused integration tests.
