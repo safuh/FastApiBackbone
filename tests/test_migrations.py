@@ -29,7 +29,15 @@ async def test_alembic_upgrade_and_downgrade() -> None:
                 )
             )
             user_columns = {row[0] for row in result}
+            result = await connection.execute(
+                text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_name = 'refresh_tokens'"
+                )
+            )
+            refresh_token_columns = {row[0] for row in result}
         assert {"id", "identifier", "password_hash", "created_at"} <= user_columns
+        assert {"token_id", "subject", "expires_at", "revoked"} <= refresh_token_columns
     finally:
         await engine.dispose()
 

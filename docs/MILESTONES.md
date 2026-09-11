@@ -87,6 +87,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] User persistence model as an optional identity module.
 - [ ] Login/register/refresh/logout HTTP/application flows.
 - [~] Refresh-token rotation and revocation; awaiting CI verification.
+- [~] SQLAlchemy refresh-token persistence and migration; awaiting CI verification.
 - [ ] RBAC and OAuth2 scopes.
 - [ ] Rate limiting and abuse controls.
 - [x] Security-focused integration tests.
