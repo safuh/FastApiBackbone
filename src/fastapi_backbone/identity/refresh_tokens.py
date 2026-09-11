@@ -67,7 +67,6 @@ class SqlAlchemyRefreshTokenStore(RefreshTokenStore):
             token_id=UUID(record.token_id),
             subject=record.subject,
             expires_in=max(record.expires_at - now, timedelta(0)),
-            revoked=record.revoked,
         )
 
     async def revoke(self, token_id: UUID) -> bool:
