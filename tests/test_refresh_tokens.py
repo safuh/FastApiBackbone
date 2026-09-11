@@ -1,12 +1,12 @@
 """Tests for application-level refresh-token rotation."""
 
 from datetime import timedelta
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pytest
 
-from fastapi_backbone.auth.tokens import TokenError, TokenService
 from fastapi_backbone.auth.refresh import RefreshTokenService
+from fastapi_backbone.auth.tokens import TokenError, TokenService
 
 
 class InMemoryRefreshTokenStore:
