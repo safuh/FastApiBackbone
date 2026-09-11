@@ -97,7 +97,10 @@ def client() -> TestClient:
             refresh_token_service=refresh,
         )
 
-    settings = Settings(environment=Environment.TEST, database_url="sqlite+aiosqlite:///:memory:")
+    settings = Settings(
+        environment=Environment.TEST,
+        database_url="sqlite+aiosqlite:///:memory:",
+    )
     with TestClient(create_app(settings, application_factory)) as test_client:
         yield test_client
 
