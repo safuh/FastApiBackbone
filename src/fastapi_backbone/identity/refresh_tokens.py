@@ -68,10 +68,13 @@ class SqlAlchemyRefreshTokenStore(RefreshTokenStore):
         )
         if record is None:
             return None
+        expires_at = record.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=UTC)
         return RefreshTokenRecord(
             token_id=UUID(record.token_id),
             subject=record.subject,
-            expires_in=max(record.expires_at - now, timedelta(0)),
+            expires_in=max(expires_at - now, timedelta(0)),
         )
 
     async def revoke(self, token_id: UUID) -> bool:
