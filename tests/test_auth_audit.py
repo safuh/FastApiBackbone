@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Any
 
 import pytest
 
@@ -6,9 +7,7 @@ from fastapi_backbone.auth import (
     AuditEvent,
     AuthenticationApplication,
     AuthenticationError,
-    LoginService,
     NullAuditSink,
-    RegistrationService,
     StructuredAuditSink,
     TokenService,
 )
@@ -23,37 +22,37 @@ class RecordingAuditSink:
 
 
 class FakeRegistrationService:
-    async def register(self, request):
+    async def register(self, request: Any) -> Any:
         return type("RegistrationResult", (), {"subject": "user-123"})()
 
 
 class FakeLoginService:
-    def __init__(self, result=None, error: Exception | None = None) -> None:
+    def __init__(self, result: Any = None, error: Exception | None = None) -> None:
         self.result = result
         self.error = error
 
-    async def login(self, request):
+    async def login(self, request: Any) -> Any:
         if self.error is not None:
             raise self.error
         return self.result
 
 
 class FakeRefreshTokenService:
-    async def issue(self, subject, access_token):
+    async def issue(self, subject: str, access_token: str) -> Any:
         return type(
             "RefreshResult",
             (),
             {"subject": subject, "access_token": access_token, "refresh_token": "refresh"},
         )()
 
-    async def rotate(self, refresh_token):
+    async def rotate(self, refresh_token: str) -> Any:
         return type(
             "RefreshResult",
             (),
             {"subject": "user-123", "access_token": "access", "refresh_token": "replacement"},
         )()
 
-    async def revoke(self, refresh_token):
+    async def revoke(self, refresh_token: str) -> bool:
         return True
 
 
@@ -98,11 +97,11 @@ async def test_authentication_failure_emits_event_without_identifier() -> None:
     assert sink.events == [AuditEvent("login", "failure")]
 
 
-def test_structured_audit_sink_does_not_include_credentials_or_tokens(capsys) -> None:
+def test_structured_audit_sink_does_not_include_credentials_or_tokens(capsys: Any) -> None:
     sink = StructuredAuditSink()
     sink.emit(AuditEvent("login", "success", "user-123"))
 
-    output = capsys.readouterr().out
+    output = capsys.readouterr().err
     assert "identity_audit" in output
     assert "login" in output
     assert "success" in output
