@@ -22,7 +22,7 @@ class AuthenticationApplication:
     async def login(self, request: LoginRequest) -> RefreshResult:
         """Authenticate credentials and issue an access/refresh-token pair."""
         login = await self.login_service.login(request)
-        return await self.refresh_token_service.issue(login.subject)
+        return await self.refresh_token_service.issue(login.subject, login.access_token)
 
     async def refresh(self, refresh_token: str) -> RefreshResult:
         """Rotate a refresh token and issue its replacement pair."""
