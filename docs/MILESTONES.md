@@ -172,6 +172,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [ ] Generated-project compatibility matrix.
 - [ ] Upgrade guide.
 - [ ] External contributor review.
+- [ ] Release candidate feedback incorporated.
 
 ## Phase 10 — v1.0
 
