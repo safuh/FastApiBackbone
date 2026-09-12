@@ -56,7 +56,24 @@ jobs:
   docker-smoke:
     runs-on: ubuntu-latest
     needs: test
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.12.13"
+      - name: Refresh lockfile for this development branch
+        if: github.event_name == 'pull_request' && github.head_ref == 'feat/production-docker-reproducibility'
+        run: |
+          uv lock
+          if git diff --quiet -- uv.lock; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add uv.lock
+          git commit -m "build: refresh uv lockfile"
+          git push origin HEAD:${{ github.head_ref }}
       - name: Docker smoke test
         run: bash scripts/docker-smoke.sh
