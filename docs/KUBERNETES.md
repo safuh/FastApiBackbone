@@ -6,7 +6,7 @@ FastAPI Backbone includes a small Kustomize reference deployment for Kubernetes.
 
 - `k8s/base/` — reusable Deployment, Service, and non-secret application configuration.
 - `k8s/base/secret.example.yaml` — secret template; it is intentionally **not** part of the base Kustomization.
-- `k8s/base/migration-kustomization.yaml` — reusable Kustomize entrypoint for the migration Job.
+- `k8s/base/migration/` — reusable Kustomize base for the one-shot migration Job.
 - `k8s/overlays/production/` — production image override.
 - `k8s/overlays/production/migration/` — production image override for the migration Job.
 
