@@ -72,4 +72,4 @@ jobs:
       - name: Validate Kustomize manifests
         run: |
           kubectl kustomize k8s/overlays/production >/dev/null
-          kubectl kustomize k8s/migration >/dev/null
+          kubectl kustomize k8s/overlays/production/migration >/dev/null
