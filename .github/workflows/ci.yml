@@ -64,3 +64,12 @@ jobs:
           DATABASE_URL=postgresql+asyncpg://user:password@db:5432/backbone docker compose -f docker/compose.production.yml config --quiet
       - name: Docker smoke test
         run: bash scripts/docker-smoke.sh
+
+  kubernetes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Kustomize manifests
+        run: |
+          kubectl kustomize k8s/overlays/production >/dev/null
+          kubectl kustomize k8s/overlays/production/migration >/dev/null

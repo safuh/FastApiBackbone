@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fastapi-backbone-config
+data:
+  APP_NAME: FastAPI Backbone
+  APP_VERSION: 0.1.0
+  ENVIRONMENT: production
+  LOG_LEVEL: INFO
+  LOG_JSON: "true"
+  CORS_ORIGINS: "[]"
+  CORS_ALLOW_CREDENTIALS: "false"
