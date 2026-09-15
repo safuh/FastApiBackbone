@@ -69,7 +69,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] PostgreSQL integration tests in CI.
 - [x] Migration upgrade/downgrade test gate.
 - [x] Migration safety documentation.
-- [ ] Additional migration command helpers.
+- [x] Additional migration command helpers.
 
 **Acceptance:** a clean checkout can create a database, run migrations, execute integration tests, and recover from a migration failure using documented procedures.
 
@@ -123,13 +123,13 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 
 ## Phase 6 — Docker & local development
 
-**Status: [~] M1 Docker smoke contract implemented; production container hardening remains**
+**Status: [~] Production container hardening implemented; deployment path remains**
 
 - [x] PostgreSQL Compose service.
 - [x] Non-root container execution.
 - [x] Health checks.
 - [x] Local smoke-test workflow.
-- [ ] Production Dockerfile hardening and reproducible lockfile workflow.
+- [x] Production Dockerfile hardening and reproducible lockfile workflow.
 - [ ] One-command production deployment path.
 
 ## Phase 7 — Kubernetes
@@ -154,7 +154,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [ ] Metrics integration point.
 - [x] Structured audit events for identity operations.
 - [x] Dependency vulnerability scanning.
-- [ ] Secret scanning.
+- [x] Secret scanning.
 - [ ] SBOM/release provenance.
 - [x] Threat model review.
 - [x] Security regression suite.
