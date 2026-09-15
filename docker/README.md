@@ -1,15 +1,17 @@
 # Docker
 
-Docker assets will provide reproducible development and production application images.
+The repository contains separate Docker Compose definitions for development and the reference production deployment path.
 
-## Requirements for the production image
+## Production image contract
 
 - multi-stage build where useful;
 - non-root runtime user;
-- deterministic dependency installation;
+- deterministic dependency installation from `uv.lock`;
 - no development dependencies in production;
 - process-level health endpoint;
-- graceful signal handling; and
+- graceful container shutdown through the application process; and
 - no secrets baked into image layers.
 
-The Docker milestone is pending. Do not treat the current repository as having a validated production container until the Docker acceptance checklist in `docs/MILESTONES.md` is complete.
+The production image is built by `docker/Dockerfile`. The reference production deployment is defined by `docker/compose.production.yml` and orchestrated by `scripts/docker-production.sh` / `make docker-prod`.
+
+Production credentials are supplied externally. The production Compose definition requires `DATABASE_URL` and does not define database credentials or other secrets.

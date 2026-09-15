@@ -58,5 +58,9 @@ jobs:
     needs: test
     steps:
       - uses: actions/checkout@v4
+      - name: Validate production deployment definition
+        run: |
+          bash -n scripts/docker-production.sh
+          DATABASE_URL=postgresql+asyncpg://user:password@db:5432/backbone docker compose -f docker/compose.production.yml config --quiet
       - name: Docker smoke test
         run: bash scripts/docker-smoke.sh
