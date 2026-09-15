@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-backbone
+spec:
+  selector:
+    app.kubernetes.io/name: fastapi-backbone
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+  type: ClusterIP
