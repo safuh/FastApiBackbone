@@ -123,14 +123,14 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 
 ## Phase 6 — Docker & local development
 
-**Status: [~] Production container hardening implemented; deployment path remains**
+**Status: [~] Production container hardening and reference deployment path implemented; final deployment verification remains**
 
 - [x] PostgreSQL Compose service.
 - [x] Non-root container execution.
 - [x] Health checks.
 - [x] Local smoke-test workflow.
 - [x] Production Dockerfile hardening and reproducible lockfile workflow.
-- [ ] One-command production deployment path.
+- [~] One-command production deployment path.
 
 ## Phase 7 — Kubernetes
 
