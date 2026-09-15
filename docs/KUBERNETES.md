@@ -6,8 +6,9 @@ FastAPI Backbone includes a small Kustomize reference deployment for Kubernetes.
 
 - `k8s/base/` — reusable Deployment, Service, and non-secret application configuration.
 - `k8s/base/secret.example.yaml` — secret template; it is intentionally **not** part of the base Kustomization.
-- `k8s/migration/` — Kustomize entrypoint for the explicit one-shot Alembic migration Job.
+- `k8s/base/migration-kustomization.yaml` — reusable Kustomize entrypoint for the migration Job.
 - `k8s/overlays/production/` — production image override.
+- `k8s/overlays/production/migration/` — production image override for the migration Job.
 
 ## Before applying
 
@@ -24,7 +25,7 @@ The application image is also intentionally a release input. The production over
 
 ```bash
 kubectl kustomize k8s/overlays/production
-kubectl kustomize k8s/migration
+kubectl kustomize k8s/overlays/production/migration
 ```
 
 Review the rendered manifests before applying them.
@@ -34,7 +35,7 @@ Review the rendered manifests before applying them.
 Migrations are deliberately separate from API startup. Build/apply the workload only after the image, ConfigMap, and Secret are ready, and run the migration Job explicitly:
 
 ```bash
-kubectl create -k k8s/migration
+kubectl create -k k8s/overlays/production/migration
 kubectl get jobs
 kubectl logs job/<generated-migration-job-name>
 ```
