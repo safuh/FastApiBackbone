@@ -1,4 +1,4 @@
-.PHONY: install test lint typecheck check run prod migrate docker-up docker-down docker-test
+.PHONY: install test lint typecheck check run prod migrate migrate-up migrate-down migrate-current migrate-history docker-up docker-down docker-test
 
 install:
 	uv sync --extra dev
@@ -20,8 +20,19 @@ run:
 prod:
 	uv run uvicorn fastapi_backbone.app:create_app --factory --host 0.0.0.0 --port 8000
 
-migrate:
+migrate: migrate-up
+
+migrate-up:
 	uv run alembic upgrade head
+
+migrate-down:
+	uv run alembic downgrade -1
+
+migrate-current:
+	uv run alembic current
+
+migrate-history:
+	uv run alembic history
 
 docker-up:
 	docker compose -f docker/compose.yml up --build -d

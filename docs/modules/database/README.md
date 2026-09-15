@@ -22,8 +22,19 @@ PostgreSQL is the production target. SQLite + `aiosqlite` exists for lightweight
 
 Alembic owns schema history. Product applications own their models and migration revisions.
 
+Direct Alembic commands remain available, while the Makefile provides stable migration helpers:
+
 ```bash
-alembic upgrade head
+make migrate-up       # upgrade to the latest revision
+make migrate-down     # downgrade exactly one revision
+make migrate-current  # show the database's current revision
+make migrate-history  # show migration history
+make migrate          # alias for migrate-up
+```
+
+For a new revision, use Alembic directly:
+
+```bash
 alembic revision --autogenerate -m "describe change"
 ```
 
