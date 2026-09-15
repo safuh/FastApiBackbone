@@ -1,4 +1,4 @@
-.PHONY: install test lint typecheck check run prod migrate migrate-up migrate-down migrate-current migrate-history docker-up docker-down docker-test
+.PHONY: install test lint typecheck check run prod migrate migrate-up migrate-down migrate-current migrate-history docker-up docker-down docker-test docker-prod
 
 install:
 	uv sync --extra dev
@@ -42,3 +42,6 @@ docker-down:
 
 docker-test:
 	bash scripts/docker-smoke.sh
+
+docker-prod:
+	bash scripts/docker-production.sh
