@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: fastapi-backbone-migrate-
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: fastapi-backbone-migration
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: fastapi-backbone:0.1.0
+          imagePullPolicy: IfNotPresent
+          command: ["alembic", "upgrade", "head"]
+          envFrom:
+            - configMapRef:
+                name: fastapi-backbone-config
+            - secretRef:
+                name: fastapi-backbone
