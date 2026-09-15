@@ -37,10 +37,15 @@ Migrations are deliberately separate from API startup. Build/apply the workload 
 ```bash
 kubectl create -k k8s/overlays/production/migration
 kubectl get jobs
-kubectl logs job/<generated-migration-job-name>
+kubectl logs job/fastapi-backbone-migrate
 ```
 
-The Job uses `generateName`, so each invocation creates a new one-shot Job. The migration command is exactly `alembic upgrade head`.
+The migration Job has a stable name because Kustomize requires named resources. It is a one-shot Job running exactly `alembic upgrade head`. Before rerunning it, remove the completed/failed Job:
+
+```bash
+kubectl delete job fastapi-backbone-migrate
+kubectl create -k k8s/overlays/production/migration
+```
 
 ## Deploy the API
 
