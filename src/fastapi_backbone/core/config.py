@@ -2,9 +2,13 @@
 
 from enum import StrEnum
 from functools import lru_cache
+from typing import TYPE_CHECKING
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+if TYPE_CHECKING:
+    from fastapi_backbone.ai.configuration import AISettings
 
 
 class Environment(StrEnum):
@@ -66,7 +70,7 @@ class Settings(BaseSettings):
             raise ValueError("AI_MODEL must be configured when AI_ENABLED is true")
         return self
 
-    def ai_settings(self):
+    def ai_settings(self) -> "AISettings":
         """Return normalized AI settings without making AI a core dependency."""
         from fastapi_backbone.ai.configuration import AISettings
 
