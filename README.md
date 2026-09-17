@@ -20,7 +20,7 @@ The repository currently contains a verified production foundation plus the firs
 - deterministic project generation with safe non-empty-directory protection;
 - optional `--ai` generation profile;
 - optional Pydantic AI dependency rather than a core dependency; and
-- generator tests covering basic, AI and safety paths.
+- generator and AI-infrastructure tests.
 
 The authoritative acceptance tracker is [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
@@ -40,21 +40,24 @@ The generator is being developed as a versioned template system rather than a co
 
 `--ai` is opt-in. A generated AI application gets an `ai/` boundary containing configuration and an agent factory. The model identifier is supplied by the application at runtime; business logic does not hard-code a provider SDK.
 
-The target architecture is:
+The current architecture separates three concerns:
 
 ```text
-HTTP / application use case
-          ↓
-      AI service
-          ↓
-   Pydantic AI boundary
-          ↓
-   model/provider config
-          ↓
- OpenAI / Gemini / Ollama / other supported model
+Application service
+      ↓
+Backbone AI contracts
+(AIRequest / AIResponse / AIProvider)
+      ↓
+Provider registry + model router
+      ↓
+Optional Pydantic AI adapter
+      ↓
+OpenAI / Gemini / Ollama / other Pydantic AI provider
 ```
 
-The important boundary is that **the LLM is not the authorization layer**. Future generated AI capabilities will keep tool permissions, domain policies, persistence, audit logging and consequential-action approval in deterministic application code.
+The core package does not import Pydantic AI. The optional adapter imports it only when the AI extra is installed. Pydantic AI currently supports multiple providers and OpenAI-compatible providers, including Ollama. citeturn5search4turn5search0
+
+The important boundary is that **the LLM is not the authorization layer**. Tool permissions, domain policies, persistence, audit logging and consequential-action approval belong in deterministic application code.
 
 Planned AI capabilities include structured outputs, tool execution, dependency injection, streaming, retries/timeouts, provider/model routing, fallback policies, token/cost telemetry, prompt versioning, evaluations, guardrails, RAG and human-in-the-loop workflows.
 
@@ -82,6 +85,18 @@ The factory is `fastapi_backbone.app:create_app`; the `--factory` flag is intent
 ## Configuration profiles
 
 Configuration is environment-driven through `pydantic-settings`. Supported profiles are `development`, `test`, and `production`.
+
+The optional AI settings are part of the canonical settings object:
+
+```text
+AI_ENABLED=false
+AI_PROVIDER=ollama
+AI_MODEL=ollama:qwen3
+AI_TIMEOUT_SECONDS=30
+AI_MAX_RETRIES=2
+```
+
+When AI is enabled, `AI_MODEL` must use the `provider:model` format. Provider credentials, base URLs and SDK-specific options remain adapter/provider concerns rather than application-domain concerns.
 
 Production configuration rejects debug mode and non-PostgreSQL database URLs. Never commit production secrets.
 
@@ -151,7 +166,7 @@ See [`docs/architecture/`](docs/architecture/) and its ADRs for durable boundary
 
 **Version: 0.1.0-alpha**
 
-M1 Core Foundation is complete and verified. Phase 4 Generator/CLI has started with the CLI and optional AI generation foundation implemented on `feat/project-generator-ai-foundation`.
+M1 Core Foundation is complete and verified. Phase 4 Generator/CLI is in progress with the CLI, optional AI generation foundation, canonical AI configuration, provider registry, model routing boundary and optional Pydantic AI runtime adapter implemented on `feat/project-generator-ai-foundation`.
 
 ## Production-grade definition
 
