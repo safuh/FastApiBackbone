@@ -5,6 +5,19 @@ from pathlib import Path
 import pytest
 
 from fastapi_backbone.generator import GenerationError, ProjectGenerator
+from fastapi_backbone.template_registry import TEMPLATE_PROFILES, get_template_profile
+
+
+def test_template_registry_has_default_and_ai_profiles() -> None:
+    assert {profile.name for profile in TEMPLATE_PROFILES} == {"default", "ai"}
+    assert get_template_profile("default").ai_enabled is False
+    assert get_template_profile("ai").ai_enabled is True
+    assert get_template_profile("default").version == get_template_profile("ai").version
+
+
+def test_template_registry_rejects_unknown_profile() -> None:
+    with pytest.raises(ValueError, match="unknown template profile"):
+        get_template_profile("unknown")
 
 
 def test_generator_creates_production_project(tmp_path: Path) -> None:
