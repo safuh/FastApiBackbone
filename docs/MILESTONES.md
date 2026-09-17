@@ -83,7 +83,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] `db` migration helper commands (`upgrade`, `downgrade`, `current`, `history`).
 - [x] `doctor` environment diagnostics.
 - [ ] OpenAPI client generation command.
-- [~] Generated-project quality gates; generation assertions are implemented, end-to-end generated-project execution remains to be verified in CI.
+- [x] Generated-project quality gates; default and AI projects pass end-to-end generation, lint, type checking, tests, migration upgrade/downgrade/upgrade, Docker smoke, Kubernetes validation, security, and secret scanning in CI.
 
 ### AI application architecture
 
