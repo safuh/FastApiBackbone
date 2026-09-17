@@ -15,7 +15,13 @@ class GenerationError(ValueError):
 class ProjectGenerator:
     """Generate a testable FastAPI project from versioned templates."""
 
-    def __init__(self, name: str, output: Path, include_ai: bool = False, force: bool = False):
+    def __init__(
+        self,
+        name: str,
+        output: Path,
+        include_ai: bool = False,
+        force: bool = False,
+    ):
         self.name = name
         self.output = output
         self.include_ai = include_ai
@@ -34,9 +40,13 @@ class ProjectGenerator:
         target = (self.output / self.name).resolve()
         if target.exists():
             if not target.is_dir():
-                raise GenerationError(f"target exists and is not a directory: {target}")
+                raise GenerationError(
+                    f"target exists and is not a directory: {target}"
+                )
             if any(target.iterdir()) and not self.force:
-                raise GenerationError(f"target directory is not empty: {target}")
+                raise GenerationError(
+                    f"target directory is not empty: {target}"
+                )
         else:
             target.mkdir(parents=True, exist_ok=True)
 
@@ -51,19 +61,90 @@ class ProjectGenerator:
         if self.include_ai:
             files.extend(
                 (
-                    TemplateFile(f"src/{self.package}/ai/__init__.py", AI_INIT_TEMPLATE),
-                    TemplateFile(f"src/{self.package}/ai/agent.py", AI_AGENT_TEMPLATE),
-                    TemplateFile(f"src/{self.package}/ai/config.py", AI_CONFIG_TEMPLATE),
-                    TemplateFile("tests/test_ai.py", AI_TEST_TEMPLATE.format(package=self.package)),
+                    TemplateFile(
+                        f"src/{self.package}/ai/__init__.py",
+                        AI_INIT_TEMPLATE,
+                    ),
+                    TemplateFile(
+                        f"src/{self.package}/ai/agent.py",
+                        AI_AGENT_TEMPLATE,
+                    ),
+                    TemplateFile(
+                        f"src/{self.package}/ai/config.py",
+                        AI_CONFIG_TEMPLATE,
+                    ),
+                    TemplateFile(
+                        "tests/test_ai.py",
+                        AI_TEST_TEMPLATE.format(package=self.package),
+                    ),
                 )
             )
         return tuple(files)
 
 
-AI_INIT_TEMPLATE = '''"""Optional AI application architecture."""\n\nfrom .agent import create_agent\n\n__all__ = ["create_agent"]\n'''
+AI_INIT_TEMPLATE = '''"""Optional AI application architecture."""
 
-AI_CONFIG_TEMPLATE = '''"""AI configuration kept separate from business logic."""\n\nfrom pydantic_settings import BaseSettings, SettingsConfigDict\n\n\nclass AISettings(BaseSettings):\n    model_config = SettingsConfigDict(env_prefix="AI_", extra="ignore")\n\n    enabled: bool = False\n    model: str = ""\n    timeout_seconds: float = 30.0\n    max_retries: int = 2\n\n    def require_model(self) -> str:\n        if not self.enabled:\n            raise RuntimeError("AI is disabled")\n        model = self.model.strip()\n        if not model:\n            raise ValueError("AI_MODEL must be configured when AI_ENABLED is true")\n        if ":" not in model:\n            raise ValueError("AI_MODEL must use the provider:model format")\n        return model\n'''
+from .agent import create_agent
 
-AI_AGENT_TEMPLATE = '''"""Pydantic AI boundary for the generated application."""\n\nfrom pydantic_ai import Agent\n\nfrom .config import AISettings\n\n\ndef create_agent(settings: AISettings) -> Agent:\n    """Create an agent from validated runtime configuration.\n\n    The generated application supplies a provider:model identifier; no business\n    code needs to import an OpenAI, Gemini, or Ollama SDK. Pydantic AI resolves\n    the configured model at the runtime boundary.\n    """\n    return Agent(model=settings.require_model(), retries=settings.max_retries)\n'''
+__all__ = ["create_agent"]
+'''
 
-AI_TEST_TEMPLATE = '''import pytest\n\n\ndef test_ai_profile_is_optional() -> None:\n    pytest.importorskip("pydantic_ai")\n    from {package}.ai.agent import create_agent\n    from {package}.ai.config import AISettings\n\n    assert create_agent is not None\n    settings = AISettings(enabled=False)\n    with pytest.raises(RuntimeError, match="disabled"):\n        settings.require_model()\n'''
+AI_CONFIG_TEMPLATE = '''"""AI configuration kept separate from business logic."""
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class AISettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="AI_", extra="ignore")
+
+    enabled: bool = False
+    model: str = ""
+    timeout_seconds: float = 30.0
+    max_retries: int = 2
+
+    def require_model(self) -> str:
+        if not self.enabled:
+            raise RuntimeError("AI is disabled")
+        model = self.model.strip()
+        if not model:
+            raise ValueError(
+                "AI_MODEL must be configured when AI_ENABLED is true"
+            )
+        if ":" not in model:
+            raise ValueError("AI_MODEL must use the provider:model format")
+        return model
+'''
+
+AI_AGENT_TEMPLATE = '''"""Pydantic AI boundary for the generated application."""
+
+from pydantic_ai import Agent
+
+from .config import AISettings
+
+
+def create_agent(settings: AISettings) -> Agent:
+    """Create an agent from validated runtime configuration.
+
+    The generated application supplies a provider:model identifier; no business
+    code needs to import an OpenAI, Gemini, or Ollama SDK. Pydantic AI resolves
+    the configured model at the runtime boundary.
+    """
+    return Agent(
+        model=settings.require_model(),
+        retries=settings.max_retries,
+    )
+'''
+
+AI_TEST_TEMPLATE = '''import pytest
+
+
+def test_ai_profile_is_optional() -> None:
+    pytest.importorskip("pydantic_ai")
+    from {package}.ai.agent import create_agent
+    from {package}.ai.config import AISettings
+
+    assert create_agent is not None
+    settings = AISettings(enabled=False)
+    with pytest.raises(RuntimeError, match="disabled"):
+        settings.require_model()
+'''

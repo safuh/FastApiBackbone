@@ -18,7 +18,7 @@ class AISettings(BaseModel):
     max_retries: int = Field(default=2, ge=0)
 
     @model_validator(mode="after")
-    def validate_enabled_model(self) -> "AISettings":
+    def validate_enabled_model(self) -> AISettings:
         if self.enabled and not self.model.strip():
             raise ValueError("AI model must be configured when AI is enabled")
         return self

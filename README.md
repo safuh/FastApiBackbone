@@ -55,7 +55,7 @@ Optional Pydantic AI adapter
 OpenAI / Gemini / Ollama / other Pydantic AI provider
 ```
 
-The core package does not import Pydantic AI. The optional adapter imports it only when the AI extra is installed. Pydantic AI currently supports multiple providers and OpenAI-compatible providers, including Ollama. citeturn5search4turn5search0
+The core package does not import Pydantic AI. The optional adapter imports it only when the AI extra is installed. See the [Pydantic AI model provider documentation](https://ai.pydantic.dev/models/) and [Ollama provider documentation](https://ai.pydantic.dev/models/ollama/) for the supported provider model interfaces.
 
 The important boundary is that **the LLM is not the authorization layer**. Tool permissions, domain policies, persistence, audit logging and consequential-action approval belong in deterministic application code.
 
