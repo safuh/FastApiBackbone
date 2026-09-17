@@ -39,6 +39,10 @@ EOF
     exit 1
   fi
 
+  echo "Validating client generated without hooks"
+  uv run --project "$repo_root" --with ruff ruff check "$project/client-no-hooks"
+  uv run --project "$repo_root" --with ruff ruff format --check "$project/client-no-hooks"
+
   rm -rf "$project/client-no-hooks"
   if ! uv run --project "$repo_root" --with openapi-python-client fastapi-backbone client generate     --spec "$project/openapi.json"     --output "$project/client"; then
     echo "Client generation failed with default post-hooks; inspecting generated output"
