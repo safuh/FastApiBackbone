@@ -1,4 +1,4 @@
-# ruff: noqa: E501
+# ruff: noqa
 """Versioned source templates used by the project generator."""
 
 from __future__ import annotations
@@ -39,7 +39,12 @@ def _render_source(package: str, include_ai: bool) -> list[TemplateFile]:
     app_source = root / "app.py"
     content = app_source.read_text(encoding="utf-8").replace("fastapi_backbone", package)
     files.append(TemplateFile(f"src/{package}/app.py", content))
-    files.append(TemplateFile(f"src/{package}/__init__.py", '"""Generated FastAPI application."""\n'))
+    files.append(
+        TemplateFile(
+            f"src/{package}/__init__.py",
+            '"""Generated FastAPI application."""\n',
+        )
+    )
     return files
 
 
@@ -59,9 +64,7 @@ def render_default_template(
             ),
             TemplateFile(
                 ".env.example",
-                "ENVIRONMENT=development\nDEBUG=false\nDATABASE_URL=sqlite+aiosqlite:///./app.db\nAPP_NAME="
-                + project_name
-                + "\nAPP_VERSION=0.1.0\nAI_ENABLED=false\nAI_MODEL=\n",
+                ".env.example",
             ),
             TemplateFile(
                 ".gitignore",
