@@ -65,6 +65,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Allow generation into an existing empty project directory.",
     )
 
+    doctor = subparsers.add_parser("doctor", help="Check a generated project for required foundation files.")
+    doctor.add_argument("--path", type=Path, default=Path("."), help="Project directory to diagnose (default: current directory).")
+
     db = subparsers.add_parser("db", help="Run an explicit Alembic migration command.")
     db_subparsers = db.add_subparsers(dest="db_command", required=True)
 
@@ -78,6 +81,30 @@ def build_parser() -> argparse.ArgumentParser:
     db_subparsers.add_parser("history", help="Show migration history.")
 
     return parser
+
+
+def _doctor(project_root: Path) -> int:
+    """Diagnose the structural health of a generated project without mutating it."""
+    root = project_root.resolve()
+    checks = {
+        "project directory": root.is_dir(),
+        "pyproject.toml": (root / "pyproject.toml").is_file(),
+        "alembic.ini": (root / "alembic.ini").is_file(),
+        "alembic environment": (root / "alembic" / "env.py").is_file(),
+        "source package": any(
+            path.is_dir() and (path / "__init__.py").is_file()
+            for path in (root / "src").glob("*")
+        ) if (root / "src").is_dir() else False,
+        "tests": (root / "tests").is_dir(),
+    }
+    failed = [name for name, passed in checks.items() if not passed]
+    for name, passed in checks.items():
+        print(f"[{"OK" if passed else "FAIL"}] {name}")
+    if failed:
+        print(f"Doctor found {len(failed)} issue(s) in {root}")
+        return 1
+    print(f"Doctor found no structural issues in {root}")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -98,6 +125,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.ai:
             print("AI profile: Pydantic AI architecture included (provider configured at runtime).")
         return 0
+
+    if args.command == "doctor":
+        return _doctor(args.path)
 
     if args.command == "db":
         arguments = [args.db_command]
