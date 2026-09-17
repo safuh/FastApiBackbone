@@ -78,7 +78,7 @@ def render_default_template(
             ),
             TemplateFile(
                 "tests/test_app.py",
-                f'''from {package}.app import create_app\nfrom {package}.core.config import Environment, Settings\n\n\ndef test_application_factory() -> None:\n    app = create_app(Settings.for_profile(Environment.TEST))\n    assert app.title == "FastAPI Backbone"\n\n\ndef test_liveness_route_is_registered() -> None:\n    app = create_app(Settings.for_profile(Environment.TEST))\n    paths = {{route.path for route in app.routes if hasattr(route, "path")}}\n    assert any(path.endswith("/health/live") for path in paths)\n''',
+                f'''from {package}.app import create_app\nfrom {package}.core.config import Environment, Settings\n\n\ndef test_application_factory() -> None:\n    app = create_app(Settings.for_profile(Environment.TEST))\n    assert app.title == "FastAPI Backbone"\n\n\ndef test_liveness_route_is_registered() -> None:\n    app = create_app(Settings.for_profile(Environment.TEST))\n    assert "/api/health/live" in app.openapi()["paths"]\n''',
             ),
             TemplateFile(
                 "Dockerfile",
