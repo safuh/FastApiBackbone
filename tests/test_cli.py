@@ -129,6 +129,8 @@ def test_generate_client_uses_openapi_python_client(tmp_path: Path) -> None:
     assert run.call_args.args[0] == [
         "/usr/bin/openapi-python-client",
         "generate",
+        "--meta",
+        "uv",
         "--output-path",
         str(output.resolve()),
         "--path",
