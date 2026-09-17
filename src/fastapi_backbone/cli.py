@@ -99,7 +99,8 @@ def _doctor(project_root: Path) -> int:
     }
     failed = [name for name, passed in checks.items() if not passed]
     for name, passed in checks.items():
-        print(f"[{"OK" if passed else "FAIL"}] {name}")
+        status = "OK" if passed else "FAIL"
+        print(f"[{status}] {name}")
     if failed:
         print(f"Doctor found {len(failed)} issue(s) in {root}")
         return 1
