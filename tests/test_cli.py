@@ -131,12 +131,17 @@ def test_generate_client_uses_openapi_python_client(tmp_path: Path) -> None:
         "generate",
         "--meta",
         "uv",
+        "--config",
+        str(output.parent / ".openapi-python-client.yml"),
         "--output-path",
         str(output.resolve()),
         "--path",
         str(spec.resolve()),
     ]
     assert run.call_args.kwargs["check"] is False
+    assert (output.parent / ".openapi-python-client.yml").read_text(encoding="utf-8") == (
+        "post_hooks:\n  - ruff check . --fix\n  - ruff format .\n"
+    )
 
 
 def test_generate_client_requires_external_tool(tmp_path: Path) -> None:
