@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [{name = "Safu Harry", email = "harrysafu@gmail.com"}]
-keywords = ["fastapi", "sqlalchemy", "alembic", "flutter", "docker", "kubernetes", "backend", "scaffolding"]
+keywords = ["fastapi", "sqlalchemy", "alembic", "ai", "pydantic-ai", "backend", "scaffolding"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -35,6 +35,9 @@ dependencies = [
     "PyJWT>=2.9,<3.0",
     "pwdlib[argon2]>=0.2,<1.0",
 ]
+
+[project.scripts]
+fastapi-backbone = "fastapi_backbone.cli:main"
 
 [project.optional-dependencies]
 dev = [
