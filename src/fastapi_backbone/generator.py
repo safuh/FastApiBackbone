@@ -63,11 +63,10 @@ class ProjectGenerator:
         if self.include_ai:
             ai_test = (
                 "import pytest\n\n"
-                "\n\n"
+                "\n"
                 "def test_ai_profile_is_optional() -> None:\n"
                 "    pytest.importorskip(\"pydantic_ai\")\n"
-                f"    from {self.package}.ai.configuration import AISettings\n"
-                "\n"
+                f"    from {self.package}.ai.configuration import AISettings\n\n"
                 "    settings = AISettings(enabled=False)\n"
                 "    assert settings.enabled is False\n"
             )
