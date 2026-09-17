@@ -5,11 +5,18 @@ import pytest
 from fastapi_backbone.generator import GenerationError, ProjectGenerator
 
 
-def test_generator_creates_basic_project(tmp_path: Path) -> None:
+def test_generator_creates_production_project(tmp_path: Path) -> None:
     target = ProjectGenerator("billing-api", tmp_path).generate()
 
     assert target == (tmp_path / "billing-api").resolve()
     assert (target / "src/billing_api/app.py").exists()
+    assert (target / "src/billing_api/core/database.py").exists()
+    assert (target / "src/billing_api/auth/application.py").exists()
+    assert (target / "src/billing_api/identity/models.py").exists()
+    assert (target / "alembic/env.py").exists()
+    assert (target / "alembic/versions/0001_initial.py").exists()
+    assert (target / "Dockerfile").exists()
+    assert (target / ".github/workflows/ci.yml").exists()
     assert (target / "tests/test_app.py").exists()
     assert not (target / "src/billing_api/ai").exists()
 
@@ -18,6 +25,8 @@ def test_generator_ai_profile_is_optional(tmp_path: Path) -> None:
     target = ProjectGenerator("ai-api", tmp_path, include_ai=True).generate()
 
     assert (target / "src/ai_api/ai/agent.py").exists()
+    assert (target / "src/ai_api/ai/configuration.py").exists()
+    assert (target / "src/ai_api/ai/pydantic_ai_adapter.py").exists()
     assert "pydantic-ai" in (target / "pyproject.toml").read_text()
 
 
