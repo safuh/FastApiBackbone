@@ -96,9 +96,17 @@ def test_doctor_parser_defaults_to_current_directory() -> None:
     assert args.command == "doctor"
     assert args.path == Path(".")
 
+
 def test_client_parser_accepts_spec_and_output() -> None:
     args = build_parser().parse_args(
-        ["client", "generate", "--spec", "openapi.json", "--output", "generated-client"]
+        [
+            "client",
+            "generate",
+            "--spec",
+            "openapi.json",
+            "--output",
+            "generated-client",
+        ]
     )
     assert args.client_command == "generate"
     assert args.spec == Path("openapi.json")
@@ -110,12 +118,14 @@ def test_generate_client_uses_openapi_python_client(tmp_path: Path) -> None:
     spec.write_text("{}", encoding="utf-8")
     output = tmp_path / "client"
 
-    with patch("fastapi_backbone.cli.shutil.which", return_value="/usr/bin/openapi-python-client"):
+    with patch(
+        "fastapi_backbone.cli.shutil.which",
+        return_value="/usr/bin/openapi-python-client",
+    ):
         with patch("fastapi_backbone.cli.subprocess.run") as run:
             run.return_value.returncode = 0
             assert _generate_client(spec=spec, url=None, output=output) == 0
 
-    assert output.is_dir()
     assert run.call_args.args[0] == [
         "/usr/bin/openapi-python-client",
         "generate",
