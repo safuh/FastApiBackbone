@@ -1,4 +1,6 @@
+from importlib import import_module
 from pathlib import Path
+import sys
 
 import pytest
 
@@ -19,6 +21,19 @@ def test_generator_creates_production_project(tmp_path: Path) -> None:
     assert (target / ".github/workflows/ci.yml").exists()
     assert (target / "tests/test_app.py").exists()
     assert not (target / "src/billing_api/ai").exists()
+
+
+def test_generated_default_project_imports_without_ai_dependency(tmp_path: Path) -> None:
+    target = ProjectGenerator("generated-api", tmp_path).generate()
+    sys.path.insert(0, str(target / "src"))
+    try:
+        app_module = import_module("generated_api.app")
+        assert app_module.create_app is not None
+    finally:
+        sys.path.remove(str(target / "src"))
+        for module_name in tuple(sys.modules):
+            if module_name == "generated_api" or module_name.startswith("generated_api."):
+                del sys.modules[module_name]
 
 
 def test_generator_ai_profile_is_optional(tmp_path: Path) -> None:
@@ -58,6 +73,13 @@ def test_generator_rejects_non_empty_target(tmp_path: Path) -> None:
 
     with pytest.raises(GenerationError, match="not empty"):
         ProjectGenerator("existing", tmp_path).generate()
+
+
+def test_generator_rejects_path_escape(tmp_path: Path) -> None:
+    with pytest.raises(GenerationError, match="escapes output directory"):
+        ProjectGenerator("../escaped", tmp_path).generate()
+
+    assert not (tmp_path.parent / "escaped").exists()
 
 
 def test_generator_allows_existing_empty_target(tmp_path: Path) -> None:
