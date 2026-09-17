@@ -24,9 +24,14 @@ validate_project() {
   # Produce a real OpenAPI document from the generated application, then exercise the
   # public client-generation command against the actual openapi-python-client tool.
   uv run python -c "import json; from ${package}.app import create_app; json.dump(create_app().openapi(), open('openapi.json', 'w'), indent=2)" 
-  uv run --project "$repo_root" --with openapi-python-client fastapi-backbone client generate \
+  if ! uv run --project "$repo_root" --with openapi-python-client fastapi-backbone client generate \
     --spec "$project/openapi.json" \
-    --output "$project/client"
+    --output "$project/client"; then
+    echo "Client generation failed; inspecting generated output"
+    find "$project/client" -maxdepth 3 -type f -print 2>/dev/null || true
+    uv run --project "$repo_root" --with ruff ruff check "$project/client" || true
+    exit 1
+  fi
   test -f "$project/client/pyproject.toml"
   test -d "$project/client/$package"
   popd >/dev/null
