@@ -22,10 +22,11 @@ def _source_root() -> Path:
     return Path(__file__).resolve().parent
 
 
-def _render_source(package: str) -> list[TemplateFile]:
+def _render_source(package: str, include_ai: bool) -> list[TemplateFile]:
     root = _source_root()
+    directories = _SOURCE_DIRS + (("ai",) if include_ai else ())
     files: list[TemplateFile] = []
-    for relative_dir in _SOURCE_DIRS:
+    for relative_dir in directories:
         source_dir = root / relative_dir
         if not source_dir.is_dir():
             raise RuntimeError(f"template source directory is missing: {source_dir}")
@@ -41,9 +42,14 @@ def _render_source(package: str) -> list[TemplateFile]:
     return files
 
 
-def render_default_template(package: str, project_name: str) -> tuple[TemplateFile, ...]:
+def render_default_template(
+    package: str,
+    project_name: str,
+    *,
+    include_ai: bool = False,
+) -> tuple[TemplateFile, ...]:
     """Render the versioned production application template."""
-    files = _render_source(package)
+    files = _render_source(package, include_ai)
     files.extend(
         (
             TemplateFile(
@@ -66,7 +72,7 @@ def render_default_template(package: str, project_name: str) -> tuple[TemplateFi
             ),
             TemplateFile(
                 "tests/test_app.py",
-                f'''from {package}.app import create_app\nfrom {package}.core.config import Environment, Settings\n\n\ndef test_application_factory() -> None:\n    app = create_app(Settings.for_profile(Environment.TEST))\n    assert app.title == "FastAPI Backbone"\n\n\ndef test_liveness_route_is_registered() -> None:\n    app = create_app(Settings.for_profile(Environment.TEST))\n    assert any(route.path.endswith("/health/live") for route in app.routes)\n''',
+                f'''from {package}.app import create_app\nfrom {package}.core.config import Environment, Settings\n\n\ndef test_application_factory() -> None:\n    app = create_app(Settings.for_profile(Environment.TEST))\n    assert app.title == "{project_name}"\n\n\ndef test_liveness_route_is_registered() -> None:\n    app = create_app(Settings.for_profile(Environment.TEST))\n    assert any(route.path.endswith("/health/live") for route in app.routes)\n''',
             ),
             TemplateFile(
                 "Dockerfile",
