@@ -23,7 +23,7 @@ validate_project() {
 
   # Produce a real OpenAPI document from the generated application, then exercise the
   # public client-generation command against the actual openapi-python-client tool.
-  uv run python -c 'import json; from ${package}.app import create_app; json.dump(create_app().openapi(), open("openapi.json", "w"), indent=2)' 
+  uv run python -c "import json; from ${package}.app import create_app; json.dump(create_app().openapi(), open('openapi.json', 'w'), indent=2)" 
   uv run --project "$repo_root" --with openapi-python-client fastapi-backbone client generate \
     --spec "$project/openapi.json" \
     --output "$project/client"
