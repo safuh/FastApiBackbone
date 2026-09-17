@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from fastapi_backbone.cli import DatabaseCommandError, _run_alembic, build_parser
+from fastapi_backbone.cli import DatabaseCommandError, _doctor, _run_alembic, build_parser
 
 
 def test_db_parser_defaults_upgrade_to_head() -> None:
@@ -56,3 +56,33 @@ def test_run_alembic_sets_generated_src_on_pythonpath(tmp_path: Path) -> None:
 def test_run_alembic_requires_project_config(tmp_path: Path) -> None:
     with pytest.raises(DatabaseCommandError, match="alembic.ini not found"):
         _run_alembic(["current"], tmp_path)
+
+
+def test_doctor_accepts_a_healthy_generated_project(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+    (tmp_path / "alembic.ini").write_text("[alembic]\n", encoding="utf-8")
+    (tmp_path / "alembic").mkdir()
+    (tmp_path / "alembic" / "env.py").write_text("", encoding="utf-8")
+    (tmp_path / "src" / "demo").mkdir(parents=True)
+    (tmp_path / "src" / "demo" / "__init__.py").write_text("", encoding="utf-8")
+    (tmp_path / "tests").mkdir()
+
+    assert _doctor(tmp_path) == 0
+    assert "Doctor found no structural issues" in capsys.readouterr().out
+
+
+def test_doctor_returns_failure_for_missing_foundation_files(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
+
+    assert _doctor(tmp_path) == 1
+    output = capsys.readouterr().out
+    assert "[FAIL] alembic.ini" in output
+    assert "Doctor found" in output
+
+
+def test_doctor_parser_defaults_to_current_directory() -> None:
+    args = build_parser().parse_args(["doctor"])
+    assert args.command == "doctor"
+    assert args.path == Path(".")
