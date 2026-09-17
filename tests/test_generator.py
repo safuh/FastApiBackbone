@@ -39,6 +39,18 @@ def test_generator_ai_profile_is_optional(tmp_path: Path) -> None:
     assert "pydantic-ai" in (target / "pyproject.toml").read_text(encoding="utf-8")
 
 
+def test_generator_ai_profile_renders_canonical_sources(tmp_path: Path) -> None:
+    target = ProjectGenerator("ai-api", tmp_path, include_ai=True).generate()
+    canonical_root = Path(__file__).parents[1] / "src" / "fastapi_backbone" / "ai"
+    generated_root = target / "src" / "ai_api" / "ai"
+
+    for source in canonical_root.glob("*.py"):
+        generated = generated_root / source.name
+        assert generated.exists()
+        expected = source.read_text(encoding="utf-8").replace("fastapi_backbone", "ai_api")
+        assert generated.read_text(encoding="utf-8") == expected
+
+
 def test_generator_rejects_non_empty_target(tmp_path: Path) -> None:
     target = tmp_path / "existing"
     target.mkdir()
