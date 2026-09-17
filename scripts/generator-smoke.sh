@@ -23,11 +23,25 @@ validate_project() {
 
   # Produce a real OpenAPI document from the generated application, then exercise the
   # public client-generation command against the actual openapi-python-client tool.
-  uv run python -c "import json; from ${package}.app import create_app; json.dump(create_app().openapi(), open('openapi.json', 'w'), indent=2)" 
-  if ! uv run --project "$repo_root" --with openapi-python-client fastapi-backbone client generate \
-    --spec "$project/openapi.json" \
-    --output "$project/client"; then
-    echo "Client generation failed; inspecting generated output"
+  uv run python -c "import json; from ${package}.app import create_app; json.dump(create_app().openapi(), open('openapi.json', 'w'), indent=2)"
+
+  # Isolate the external generator from its default post-generation Ruff hooks first.
+  # This distinguishes OpenAPI parsing/model generation failures from hook failures.
+  cat > "$workdir/client-config.yml" <<'EOF'
+post_hooks: []
+EOF
+  uv run --project "$repo_root" --with openapi-python-client openapi-python-client --version
+  if ! uv run --project "$repo_root" --with openapi-python-client openapi-python-client generate     --meta uv     --config "$workdir/client-config.yml"     --path "$project/openapi.json"     --output-path "$project/client-no-hooks"; then
+    echo "External client generation failed with post-hooks disabled"
+    echo "OpenAPI metadata:"
+    uv run python -c "import json; s=json.load(open('openapi.json')); print('openapi=', s.get('openapi')); print('title=', s.get('info', {}).get('title'))"
+    find "$project/client-no-hooks" -maxdepth 3 -type f -print 2>/dev/null || true
+    exit 1
+  fi
+
+  rm -rf "$project/client-no-hooks"
+  if ! uv run --project "$repo_root" --with openapi-python-client fastapi-backbone client generate     --spec "$project/openapi.json"     --output "$project/client"; then
+    echo "Client generation failed with default post-hooks; inspecting generated output"
     find "$project/client" -maxdepth 3 -type f -print 2>/dev/null || true
     uv run --project "$repo_root" --with ruff ruff check "$project/client" || true
     exit 1
