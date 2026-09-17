@@ -26,9 +26,11 @@ The repository provides a reference production deployment path through Docker Co
    make docker-prod
    ```
 
-The deployment command builds the locked production image, runs `alembic upgrade head` as an explicit one-shot migration operation, starts the API with restart protection, and waits for the live health endpoint before reporting success.
+The deployment command builds the locked production image, runs `alembic upgrade head` as an explicit one-shot migration operation, starts the API with restart protection, and waits for the readiness endpoint before reporting success. Readiness verifies that application startup completed and that the configured database is reachable.
 
 Migrations are deliberately not part of the API container startup command. This keeps schema changes an explicit deployment operation while still providing a single reference command for the complete release sequence.
+
+If readiness is not reached within the wait window, the script exits non-zero and prints the Compose service state for diagnosis. It does not tear down the existing deployment automatically.
 
 ### Production configuration
 
