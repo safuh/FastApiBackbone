@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+from .template_registry import get_template_profile
 from .templates import TemplateFile, render_default_template
 
 
@@ -64,6 +65,7 @@ class ProjectGenerator:
         return target
 
     def _files(self) -> tuple[TemplateFile, ...]:
+        get_template_profile("ai" if self.include_ai else "default")
         files = list(
             render_default_template(
                 self.package,
