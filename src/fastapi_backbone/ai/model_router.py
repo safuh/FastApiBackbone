@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from fastapi_backbone.ai.contracts import AIModel
+from fastapi_backbone.ai.contracts import AIModel, AIProvider
 from fastapi_backbone.ai.errors import AIConfigurationError
 from fastapi_backbone.ai.providers import AIProviderRegistry
 
@@ -14,6 +14,7 @@ class ModelRoute:
     """Resolved provider/model pair."""
 
     model: AIModel
+    provider: AIProvider
 
 
 class AIModelRouter:
@@ -40,7 +41,6 @@ class AIModelRouter:
             )
         return AIModel(provider=provider, model=model)
 
-    def resolve(self, identifier: str) -> tuple[AIModel, object]:
+    def resolve(self, identifier: str) -> ModelRoute:
         model = self.parse_model_identifier(identifier)
-        provider = self._registry.create(model.provider)
-        return model, provider
+        return ModelRoute(model=model, provider=self._registry.create(model.provider))
