@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -13,6 +14,10 @@ from .generator import GenerationError, ProjectGenerator
 
 class DatabaseCommandError(RuntimeError):
     """Raised when a database helper command cannot be executed."""
+
+
+class ClientGenerationError(RuntimeError):
+    """Raised when an OpenAPI client cannot be generated."""
 
 
 def _run_alembic(arguments: list[str], project_root: Path = Path(".")) -> int:
@@ -76,6 +81,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="Project directory to diagnose (default: current directory).",
     )
 
+    client = subparsers.add_parser(
+        "client", help="Generate a client from an OpenAPI document."
+    )
+    client_subparsers = client.add_subparsers(dest="client_command", required=True)
+    generate = client_subparsers.add_parser(
+        "generate", help="Generate a Python client with openapi-python-client."
+    )
+    source = generate.add_mutually_exclusive_group(required=True)
+    source.add_argument(
+        "--spec", type=Path, help="Path to an OpenAPI JSON or YAML document."
+    )
+    source.add_argument("--url", help="URL serving an OpenAPI JSON or YAML document.")
+    generate.add_argument(
+        "--output",
+        type=Path,
+        default=Path("client"),
+        help="Output directory for the generated client (default: ./client).",
+    )
+
     db = subparsers.add_parser("db", help="Run an explicit Alembic migration command.")
     db_subparsers = db.add_subparsers(dest="db_command", required=True)
 
@@ -89,6 +113,32 @@ def build_parser() -> argparse.ArgumentParser:
     db_subparsers.add_parser("history", help="Show migration history.")
 
     return parser
+
+
+def _generate_client(
+    *,
+    spec: Path | None,
+    url: str | None,
+    output: Path,
+) -> int:
+    """Generate a Python client using the external openapi-python-client tool."""
+    executable = shutil.which("openapi-python-client")
+    if executable is None:
+        raise ClientGenerationError(
+            "openapi-python-client is required; install it before generating a client"
+        )
+
+    output_path = output.resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    arguments = [executable, "generate", "--output-path", str(output_path)]
+    if spec is not None:
+        arguments.extend(["--path", str(spec.resolve())])
+    elif url is not None:
+        arguments.extend(["--url", url])
+    else:  # pragma: no cover - argparse enforces this
+        raise ClientGenerationError("exactly one of --spec or --url is required")
+
+    return subprocess.run(arguments, check=False).returncode
 
 
 def _doctor(project_root: Path) -> int:
@@ -137,6 +187,16 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "doctor":
         return _doctor(args.path)
+
+    if args.command == "client" and args.client_command == "generate":
+        try:
+            return _generate_client(
+                spec=args.spec,
+                url=args.url,
+                output=args.output,
+            )
+        except ClientGenerationError as exc:
+            parser.error(str(exc))
 
     if args.command == "db":
         arguments = [args.db_command]
