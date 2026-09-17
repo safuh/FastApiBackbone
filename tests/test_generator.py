@@ -24,10 +24,19 @@ def test_generator_creates_production_project(tmp_path: Path) -> None:
 def test_generator_ai_profile_is_optional(tmp_path: Path) -> None:
     target = ProjectGenerator("ai-api", tmp_path, include_ai=True).generate()
 
-    assert (target / "src/ai_api/ai/agent.py").exists()
-    assert (target / "src/ai_api/ai/configuration.py").exists()
-    assert (target / "src/ai_api/ai/pydantic_ai_adapter.py").exists()
-    assert "pydantic-ai" in (target / "pyproject.toml").read_text()
+    ai_root = target / "src/ai_api/ai"
+    expected_ai_files = (
+        "__init__.py",
+        "configuration.py",
+        "contracts.py",
+        "errors.py",
+        "model_router.py",
+        "providers.py",
+        "pydantic_ai_adapter.py",
+    )
+
+    assert all((ai_root / path).exists() for path in expected_ai_files)
+    assert "pydantic-ai" in (target / "pyproject.toml").read_text(encoding="utf-8")
 
 
 def test_generator_rejects_non_empty_target(tmp_path: Path) -> None:
