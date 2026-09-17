@@ -80,7 +80,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Generated Dockerfile and PostgreSQL Compose path.
 - [x] Generated CI quality-gate workflow.
 - [x] Formal template registry and compatibility metadata.
-- [ ] `db` migration helper commands.
+- [x] `db` migration helper commands (`upgrade`, `downgrade`, `current`, `history`).
 - [ ] `doctor` environment diagnostics.
 - [ ] OpenAPI client generation command.
 - [~] Generated-project quality gates; generation assertions are implemented, end-to-end generated-project execution remains to be verified in CI.
