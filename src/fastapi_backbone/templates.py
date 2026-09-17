@@ -64,7 +64,9 @@ def render_default_template(
             ),
             TemplateFile(
                 ".env.example",
-                ".env.example",
+                "ENVIRONMENT=development\nDEBUG=false\nDATABASE_URL=sqlite+aiosqlite:///./app.db\nAPP_NAME="
+                + project_name
+                + "\nAPP_VERSION=0.1.0\nAI_ENABLED=false\nAI_MODEL=\n",
             ),
             TemplateFile(
                 ".gitignore",
