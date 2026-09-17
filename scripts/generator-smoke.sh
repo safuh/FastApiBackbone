@@ -36,6 +36,8 @@ EOF
     echo "External client generation failed with post-hooks disabled"
     echo "OpenAPI metadata:"
     uv run python -c "import json; s=json.load(open('openapi.json')); print('openapi=', s.get('openapi')); print('title=', s.get('info', {}).get('title'))"
+    echo "Direct generator diagnostics:"
+    uv run --project "$repo_root" --with openapi-python-client python -c 'from pathlib import Path; from openapi_python_client import generate; from openapi_python_client.config import ConfigFile, Config, MetaType; cf=ConfigFile.load_from_path(Path("'$workdir'/client-config.yml")); cfg=Config.from_sources(cf, MetaType.UV, Path("'$project'/openapi.json"), "utf-8", False, Path("'$project'/client-diagnostic")); errors=generate(config=cfg); [print(type(e).__name__, e.level, e.header, repr(e.detail)) for e in errors]; raise SystemExit(1 if any(e.level.value == "error" for e in errors) else 0)'
     find "$project/client-no-hooks" -maxdepth 3 -type f -print 2>/dev/null || true
     exit 1
   fi
