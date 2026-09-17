@@ -58,7 +58,9 @@ def test_run_alembic_requires_project_config(tmp_path: Path) -> None:
         _run_alembic(["current"], tmp_path)
 
 
-def test_doctor_accepts_a_healthy_generated_project(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_doctor_accepts_a_healthy_generated_project(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
     (tmp_path / "pyproject.toml").write_text("[project]\n", encoding="utf-8")
     (tmp_path / "alembic.ini").write_text("[alembic]\n", encoding="utf-8")
     (tmp_path / "alembic").mkdir()
