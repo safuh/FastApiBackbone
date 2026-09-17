@@ -130,7 +130,17 @@ def _generate_client(
 
     output_path = output.resolve()
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    # Generated services use uv, so keep the generated client metadata compatible with\n    # the same workflow rather than relying on the generator default metadata backend.\n    arguments = [\n        executable,\n        "generate",\n        "--meta",\n        "uv",\n        "--output-path",\n        str(output_path),\n    ]
+    # Generated services use uv, so keep the generated client metadata compatible
+    # with the same workflow rather than relying on the generator default metadata
+    # backend.
+    arguments = [
+        executable,
+        "generate",
+        "--meta",
+        "uv",
+        "--output-path",
+        str(output_path),
+    ]
     if spec is not None:
         arguments.extend(["--path", str(spec.resolve())])
     elif url is not None:
