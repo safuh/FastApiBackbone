@@ -6,8 +6,6 @@ from functools import lru_cache
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from fastapi_backbone.ai.configuration import AISettings
-
 
 class Environment(StrEnum):
     DEVELOPMENT = "development"
@@ -47,10 +45,9 @@ class Settings(BaseSettings):
         default_factory=lambda: ["Authorization", "Content-Type", "X-Request-ID"]
     )
 
-    # Optional AI profile. Keeping these in the canonical settings object means
-    # the AI layer does not introduce a second configuration system.
+    # Optional AI profile. The provider is encoded in AI_MODEL as provider:model,
+    # so the core configuration does not need a second provider field.
     ai_enabled: bool = False
-    ai_provider: str = ""
     ai_model: str = ""
     ai_timeout_seconds: float = Field(default=30.0, gt=0)
     ai_max_retries: int = Field(default=2, ge=0)
@@ -67,12 +64,12 @@ class Settings(BaseSettings):
             self.debug = False
         if self.ai_enabled and not self.ai_model.strip():
             raise ValueError("AI_MODEL must be configured when AI_ENABLED is true")
-        if self.ai_provider and self.ai_provider.strip().lower() != self.ai_provider.strip():
-            raise ValueError("AI_PROVIDER must be lowercase")
         return self
 
-    def ai_settings(self) -> AISettings:
-        """Return the normalized application-level AI configuration."""
+    def ai_settings(self):
+        """Return normalized AI settings without making AI a core dependency."""
+        from fastapi_backbone.ai.configuration import AISettings
+
         return AISettings(
             enabled=self.ai_enabled,
             model=self.ai_model,
