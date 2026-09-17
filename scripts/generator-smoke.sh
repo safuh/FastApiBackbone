@@ -28,7 +28,7 @@ validate_project() {
   # Isolate the external generator from its default post-generation Ruff hooks first.
   # This distinguishes OpenAPI parsing/model generation failures from hook failures.
   cat > "$workdir/client-config.yml" <<'EOF'
-post_hooks: []
+post_hooks:\n  - "true"
 EOF
   uv run --project "$repo_root" --with openapi-python-client openapi-python-client --version
   if ! uv run --project "$repo_root" --with openapi-python-client openapi-python-client generate     --meta uv     --config "$workdir/client-config.yml"     --path "$project/openapi.json"     --output-path "$project/client-no-hooks"; then
