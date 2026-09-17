@@ -65,8 +65,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Allow generation into an existing empty project directory.",
     )
 
-    doctor = subparsers.add_parser("doctor", help="Check a generated project for required foundation files.")
-    doctor.add_argument("--path", type=Path, default=Path("."), help="Project directory to diagnose (default: current directory).")
+    doctor = subparsers.add_parser(
+        "doctor",
+        help="Check a generated project for required foundation files.",
+    )
+    doctor.add_argument(
+        "--path",
+        type=Path,
+        default=Path("."),
+        help="Project directory to diagnose (default: current directory).",
+    )
 
     db = subparsers.add_parser("db", help="Run an explicit Alembic migration command.")
     db_subparsers = db.add_subparsers(dest="db_command", required=True)
