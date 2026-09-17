@@ -133,11 +133,19 @@ def _generate_client(
     # Generated services use uv, so keep the generated client metadata compatible
     # with the same workflow rather than relying on the generator default metadata
     # backend.
+    config_path = output_path.parent / ".openapi-python-client.yml"
+    config_path.write_text(
+        "post_hooks:\n  - ruff check . --fix\n  - ruff format .\n",
+        encoding="utf-8",
+    )
+
     arguments = [
         executable,
         "generate",
         "--meta",
         "uv",
+        "--config",
+        str(config_path),
         "--output-path",
         str(output_path),
     ]
