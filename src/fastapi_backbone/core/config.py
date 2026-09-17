@@ -6,6 +6,8 @@ from functools import lru_cache
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from fastapi_backbone.ai.configuration import AISettings
+
 
 class Environment(StrEnum):
     DEVELOPMENT = "development"
@@ -14,11 +16,7 @@ class Environment(StrEnum):
 
 
 class Settings(BaseSettings):
-    """Runtime configuration with explicit development/test/production profiles.
-
-    Environment variables are the final override layer. The ``environment`` field
-    selects the profile defaults, while explicit values always win.
-    """
+    """Runtime configuration with explicit development/test/production profiles."""
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -43,18 +41,19 @@ class Settings(BaseSettings):
     cors_origins: list[str] = Field(default_factory=list)
     cors_allow_credentials: bool = False
     cors_allow_methods: list[str] = Field(
-        default_factory=lambda: [
-            "GET",
-            "POST",
-            "PUT",
-            "PATCH",
-            "DELETE",
-            "OPTIONS",
-        ]
+        default_factory=lambda: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     )
     cors_allow_headers: list[str] = Field(
         default_factory=lambda: ["Authorization", "Content-Type", "X-Request-ID"]
     )
+
+    # Optional AI profile. Keeping these in the canonical settings object means
+    # the AI layer does not introduce a second configuration system.
+    ai_enabled: bool = False
+    ai_provider: str = ""
+    ai_model: str = ""
+    ai_timeout_seconds: float = Field(default=30.0, gt=0)
+    ai_max_retries: int = Field(default=2, ge=0)
 
     @model_validator(mode="after")
     def validate_profile(self) -> "Settings":
@@ -66,7 +65,20 @@ class Settings(BaseSettings):
             self.log_json = True
         if self.environment is Environment.TEST:
             self.debug = False
+        if self.ai_enabled and not self.ai_model.strip():
+            raise ValueError("AI_MODEL must be configured when AI_ENABLED is true")
+        if self.ai_provider and self.ai_provider.strip().lower() != self.ai_provider.strip():
+            raise ValueError("AI_PROVIDER must be lowercase")
         return self
+
+    def ai_settings(self) -> AISettings:
+        """Return the normalized application-level AI configuration."""
+        return AISettings(
+            enabled=self.ai_enabled,
+            model=self.ai_model,
+            timeout_seconds=self.ai_timeout_seconds,
+            max_retries=self.ai_max_retries,
+        )
 
     @classmethod
     def for_profile(cls, profile: Environment | str) -> "Settings":
