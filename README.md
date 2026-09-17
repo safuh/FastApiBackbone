@@ -17,7 +17,7 @@ The repository currently contains a verified production foundation plus the firs
 - Alembic migration discipline;
 - health/readiness, structured logging, correlation IDs and security controls;
 - `fastapi-backbone new` CLI foundation;
-- deterministic project generation with safe non-empty-directory protection;
+- deterministic project generation with safe non-empty-directory and output-boundary protection;
 - optional `--ai` generation profile;
 - optional Pydantic AI dependency rather than a core dependency; and
 - generator and AI-infrastructure tests.
@@ -90,7 +90,6 @@ The optional AI settings are part of the canonical settings object:
 
 ```text
 AI_ENABLED=false
-AI_PROVIDER=ollama
 AI_MODEL=ollama:qwen3
 AI_TIMEOUT_SECONDS=30
 AI_MAX_RETRIES=2
