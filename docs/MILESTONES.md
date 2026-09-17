@@ -79,7 +79,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Generated Alembic environment and initial identity/refresh-token migration.
 - [x] Generated Dockerfile and PostgreSQL Compose path.
 - [x] Generated CI quality-gate workflow.
-- [ ] Formal template registry and compatibility matrix.
+- [x] Formal template registry and compatibility metadata.
 - [ ] `db` migration helper commands.
 - [ ] `doctor` environment diagnostics.
 - [ ] OpenAPI client generation command.
