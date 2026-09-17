@@ -1,0 +1,28 @@
+name: Regenerate uv lockfile
+
+on:
+  pull_request:
+    branches: [feat/project-generator-ai-foundation]
+
+permissions:
+  contents: write
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chore/regenerate-lockfile
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.13"
+      - run: uv lock
+      - name: Commit lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add uv.lock
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: regenerate uv lockfile"
+          git push origin HEAD:chore/regenerate-lockfile
