@@ -32,9 +32,17 @@ The intended developer experience is:
 uv tool install fastapi-backbone
 fastapi-backbone new myapp
 fastapi-backbone new myapp --ai
+fastapi-backbone doctor --path myapp
+fastapi-backbone client generate --spec myapp/openapi.json --output myapp/client
 ```
 
 The generator is being developed as a versioned template system rather than a copy of the Backbone repository. This keeps generated applications independent from the generator source tree and lets future releases define explicit template compatibility contracts.
+### Generator diagnostics and clients
+
+The `fastapi-backbone doctor` command performs non-mutating structural checks for a generated project, including its packaging, Alembic, source-package and test foundations. It returns a non-zero status when a required foundation file or directory is missing.
+
+The `fastapi-backbone client generate` command delegates OpenAPI client generation to `openapi-python-client`. Install that tool separately, then provide either a local OpenAPI document with `--spec` or an OpenAPI URL with `--url`. The default client output directory is `./client`.
+
 
 ### AI profile
 
