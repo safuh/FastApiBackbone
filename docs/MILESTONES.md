@@ -90,13 +90,17 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Initial AI configuration contract.
 - [x] Initial Pydantic AI agent factory.
 - [x] Provider-neutral AI application contracts (`AIModel`, `AIRequest`, `AIResponse`, `AIProvider`).
-- [ ] Provider/model adapter contract with supported OpenAI, Gemini and Ollama/OpenAI-compatible configurations.
+- [x] Central AI settings integrated with the canonical application configuration.
+- [x] Explicit provider adapter registry with normalized provider names.
+- [x] Provider-neutral `provider:model` parsing and model routing boundary.
+- [x] AI infrastructure error taxonomy.
+- [ ] Concrete Pydantic AI provider adapters and supported OpenAI, Gemini and Ollama/OpenAI-compatible configurations.
 - [ ] Structured-output agent templates.
 - [ ] AI dependency-injection contract for application services, repositories and request context.
 - [ ] Tool runtime with deterministic authorization and allowlists.
 - [ ] AI streaming contract.
 - [ ] AI retries, timeouts, circuit breaking and fallback policy.
-- [ ] Model routing policy.
+- [ ] Model routing policy beyond explicit provider/model resolution.
 - [ ] Token, latency and estimated-cost telemetry.
 - [ ] Prompt versioning and prompt test fixtures.
 - [ ] AI evaluation/regression framework.
