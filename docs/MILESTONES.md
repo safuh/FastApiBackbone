@@ -41,8 +41,6 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Migration safety documentation.
 - [x] Additional migration command helpers.
 
-**Acceptance:** a clean checkout can create a database, run migrations, execute integration tests, and recover from a migration failure using documented procedures.
-
 ## Phase 3 — Identity & JWT
 
 **Status: [~] In progress; core authentication lifecycle and security contract verified**
@@ -63,8 +61,6 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Security-focused integration tests.
 - [x] Threat model and deployment guidance.
 
-**Acceptance:** authentication has documented security properties, automated abuse/security tests, and safe production defaults.
-
 ## Phase 4 — Project generator / CLI
 
 **Status: [~] In progress**
@@ -77,6 +73,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Explicit `--force` behavior for empty/existing targets.
 - [x] Deterministic generated package layout.
 - [x] Generated-project smoke test template.
+- [x] Dedicated template-rendering boundary.
 - [ ] Versioned template registry and compatibility contract.
 - [ ] Full production Backbone template generation (database, migrations, auth, health, logging, tests, Docker).
 - [ ] `db` migration helper commands.
@@ -92,6 +89,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Runtime model identifier rather than provider-specific business logic.
 - [x] Initial AI configuration contract.
 - [x] Initial Pydantic AI agent factory.
+- [x] Provider-neutral AI application contracts (`AIModel`, `AIRequest`, `AIResponse`, `AIProvider`).
 - [ ] Provider/model adapter contract with supported OpenAI, Gemini and Ollama/OpenAI-compatible configurations.
 - [ ] Structured-output agent templates.
 - [ ] AI dependency-injection contract for application services, repositories and request context.
