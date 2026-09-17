@@ -1,55 +1,79 @@
 # FastAPI Backbone
 
-> **A production-grade foundation and project generator for FastAPI services.**
+> **A production-grade foundation and project generator for FastAPI services, with an optional provider-agnostic AI application architecture.**
 >
-> FastAPI + SQLAlchemy 2.x + Alembic + JWT authentication + PostgreSQL + Flutter + Docker + Kubernetes.
+> FastAPI + SQLAlchemy 2.x + Alembic + JWT authentication + PostgreSQL + Docker + optional Pydantic AI.
 
 [![CI](https://github.com/safuh/FastApiBackbone/actions/workflows/ci.yml/badge.svg)](https://github.com/safuh/FastApiBackbone/actions/workflows/ci.yml)
 
-FastAPI Backbone is an open-source, domain-neutral foundation for teams that want to start a serious Python API without rebuilding the same infrastructure every time.
+FastAPI Backbone is an open-source, domain-neutral foundation for teams that want to start serious Python APIs without rebuilding the same infrastructure every time. The generator is deliberately layered: the normal application remains free of AI dependencies, while an explicit `--ai` profile adds an AI boundary based on Pydantic AI.
 
-## M1 Core Foundation
+## Current implementation
 
-M1 establishes the canonical runtime and development contract. The reference application has:
+The repository currently contains a verified production foundation plus the first generator slice:
 
-- an explicit application factory;
-- development, test, and production configuration profiles;
-- deterministic async SQLAlchemy engine/session lifecycle;
-- an explicit transaction-scoped Unit of Work;
-- Alembic as the only schema migration mechanism;
-- stable liveness and dependency-backed readiness endpoints;
-- structured logging and request correlation IDs;
-- startup/shutdown tests;
-- PostgreSQL integration tests;
-- a Docker Compose smoke test; and
-- one documented local workflow.
+- explicit application factory and environment profiles;
+- async SQLAlchemy 2.x and transaction-scoped Unit of Work;
+- Alembic migration discipline;
+- health/readiness, structured logging, correlation IDs and security controls;
+- `fastapi-backbone new` CLI foundation;
+- deterministic project generation with safe non-empty-directory protection;
+- optional `--ai` generation profile;
+- optional Pydantic AI dependency rather than a core dependency; and
+- generator tests covering basic, AI and safety paths.
 
 The authoritative acceptance tracker is [`docs/MILESTONES.md`](docs/MILESTONES.md).
+
+## Generator
+
+The intended developer experience is:
+
+```bash
+uv tool install fastapi-backbone
+fastapi-backbone new myapp
+fastapi-backbone new myapp --ai
+```
+
+The generator is being developed as a versioned template system rather than a copy of the Backbone repository. This keeps generated applications independent from the generator source tree and lets future releases define explicit template compatibility contracts.
+
+### AI profile
+
+`--ai` is opt-in. A generated AI application gets an `ai/` boundary containing configuration and an agent factory. The model identifier is supplied by the application at runtime; business logic does not hard-code a provider SDK.
+
+The target architecture is:
+
+```text
+HTTP / application use case
+          ↓
+      AI service
+          ↓
+   Pydantic AI boundary
+          ↓
+   model/provider config
+          ↓
+ OpenAI / Gemini / Ollama / other supported model
+```
+
+The important boundary is that **the LLM is not the authorization layer**. Future generated AI capabilities will keep tool permissions, domain policies, persistence, audit logging and consequential-action approval in deterministic application code.
+
+Planned AI capabilities include structured outputs, tool execution, dependency injection, streaming, retries/timeouts, provider/model routing, fallback policies, token/cost telemetry, prompt versioning, evaluations, guardrails, RAG and human-in-the-loop workflows.
 
 ## Canonical local workflow
 
 Use **uv** for development. This avoids mixing virtual-environment managers and dependency resolvers.
 
 ```bash
-# one-time setup
 uv sync --extra dev
-
-# fast feedback loop
 uv run pytest
 uv run ruff check .
 uv run mypy src
-
-# all local quality gates
 make check
 ```
 
 The reference application is run with the same factory in every environment:
 
 ```bash
-# development
 make run
-
-# production-style process
 make prod
 ```
 
@@ -57,21 +81,7 @@ The factory is `fastapi_backbone.app:create_app`; the `--factory` flag is intent
 
 ## Configuration profiles
 
-Configuration is environment-driven through `pydantic-settings`. The supported profiles are `development`, `test`, and `production`.
-
-```bash
-# local development
-ENVIRONMENT=development
-DATABASE_URL=sqlite+aiosqlite:///./backbone.db
-
-# CI/integration tests
-ENVIRONMENT=test
-TEST_DATABASE_URL=postgresql+asyncpg://backbone:backbone@localhost:5432/backbone
-
-# production requires PostgreSQL and forces JSON logging
-ENVIRONMENT=production
-DATABASE_URL=postgresql+asyncpg://user:password@host:5432/app
-```
+Configuration is environment-driven through `pydantic-settings`. Supported profiles are `development`, `test`, and `production`.
 
 Production configuration rejects debug mode and non-PostgreSQL database URLs. Never commit production secrets.
 
@@ -79,19 +89,9 @@ Production configuration rejects debug mode and non-PostgreSQL database URLs. Ne
 
 PostgreSQL is the production database. SQLite is supported for lightweight local development and unit tests.
 
-The application owns one shared async engine and session factory. Application services can use `UnitOfWork` when they need an explicit transaction boundary; repositories should use the UoW's session and must not create independent transactions.
+The application owns one shared async engine and session factory. Application services can use `UnitOfWork` when they need an explicit transaction boundary; repositories should use the UoW session and must not create independent transactions.
 
-Schema changes are made only through Alembic revisions:
-
-```bash
-make migrate
-# or
-uv run alembic upgrade head
-```
-
-The repository includes an initial domain-neutral revision. It intentionally creates no product tables: consuming applications own their domain metadata and migrations.
-
-**Production rule:** application processes do not run migrations on startup. Migrations are a release operation and should run once, before the new application version becomes ready.
+Schema changes are made only through Alembic revisions. Application processes do not run migrations on startup.
 
 ## Health contract
 
@@ -101,123 +101,57 @@ GET /api/health/live  -> liveness; no database dependency
 GET /api/health/ready -> readiness; startup complete + database reachable
 ```
 
-Liveness is suitable for a process restart probe. Readiness is suitable for traffic routing and returns `503` when the application is not ready.
-
 ## Docker smoke test
-
-The canonical container check builds the image, starts PostgreSQL and the API, verifies liveness/readiness, and executes the Alembic migration:
 
 ```bash
 make docker-test
 ```
 
-To leave the stack running for manual inspection:
-
-```bash
-make docker-up
-curl -fsS http://127.0.0.1:8000/api/health/live
-curl -fsS http://127.0.0.1:8000/api/health/ready
-make docker-down
-```
-
-## Updating your local checkout without conflicts
-
-Keep `main` clean and never develop directly on it:
-
-```bash
-git switch main
-git pull --ff-only origin main
-git switch -c feat/my-change
-```
-
-Before starting new work:
-
-```bash
-git fetch origin
-git rebase origin/main
-```
-
-During development, commit small logical changes. Before pushing, run `make check`.
-
-If `main` advances while your branch is in progress:
-
-```bash
-git fetch origin
-git rebase origin/main
-make check
-git push --force-with-lease origin feat/my-change
-```
-
-Use `--force-with-lease`, never plain `--force`, after rebasing a private feature branch. Do not rebase a shared branch unless everyone using it agrees.
-
-## Safe migration workflow
-
-Never edit an already-applied migration in place. Create a new revision:
-
-```bash
-uv run alembic revision -m "describe schema change"
-# edit the generated revision
-uv run alembic upgrade head
-```
-
-Before opening a PR, verify both directions against a disposable PostgreSQL database:
-
-```bash
-TEST_DATABASE_URL=postgresql+asyncpg://backbone:backbone@localhost:5432/backbone uv run pytest -m integration
-```
+The smoke test builds the image, starts PostgreSQL and the API, verifies liveness/readiness, and exercises the migration path.
 
 ## Project vision
 
-FastAPI Backbone remains domain-neutral. Its long-term developer experience is:
+FastAPI Backbone remains domain-neutral. Its long-term workflow is:
 
 ```bash
-uv tool install fastapi-backbone
 fastapi-backbone new myapp --frontend flutter --deployment kubernetes
-cd myapp
-docker compose up
+fastapi-backbone new my-ai-app --ai
 ```
 
-Flutter, the CLI generator, Kubernetes assets, and complete identity/RBAC remain later milestones rather than being presented as finished features.
+Flutter, Kubernetes assets, richer generator options and the complete AI runtime remain milestone work rather than being presented as finished features.
 
 ## Architecture
 
 ```text
 Client(s)
-  |
-  v
+  ↓
 FastAPI HTTP boundary
-  |
-  +--> API routers / dependencies
-  |       |
-  |       v
-  |   Application services
-  |       |
-  |       +--> Domain contracts / policies
-  |       |
-  |       +--> Repository interfaces
-  |                 |
-  |                 v
-  |          Infrastructure adapters
-  |                 |
-  |              SQLAlchemy
-  |                 |
-  |             PostgreSQL
-  |
-  +--> Cross-cutting infrastructure
-          |
-          +--> Configuration
-          +--> Logging / correlation context
-          +--> Error handling
-          +--> Security
-          +--> Health / readiness
-          +--> Observability
+  ↓
+Application services
+  ├── Domain contracts / policies
+  ├── AI application layer (optional)
+  │     ├── Agents
+  │     ├── Structured outputs
+  │     ├── Tools
+  │     ├── Guardrails
+  │     └── Evaluations
+  └── Repository interfaces
+          ↓
+   Infrastructure adapters
+          ↓
+      PostgreSQL
+
+Optional AI path:
+Application → AI service → Pydantic AI → provider/model
 ```
+
+See [`docs/architecture/`](docs/architecture/) and its ADRs for durable boundary decisions.
 
 ## Current status
 
 **Version: 0.1.0-alpha**
 
-M1 is implemented on the `feat/m1-core-foundation` branch and must be considered complete only after the CI quality gates and Docker/PostgreSQL integration checks are green.
+M1 Core Foundation is complete and verified. Phase 4 Generator/CLI has started with the CLI and optional AI generation foundation implemented on `feat/project-generator-ai-foundation`.
 
 ## Production-grade definition
 
@@ -225,7 +159,7 @@ For this project, **production-grade does not mean “it starts successfully.”
 
 ## Contributing
 
-Contributions are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request. Architecture changes should include an ADR or an update to the relevant documentation when they materially affect public behavior.
+Contributions are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request. Architecture changes should include an ADR or documentation update when they materially affect public behavior or generated-project compatibility.
 
 ## Security
 
