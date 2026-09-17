@@ -49,6 +49,9 @@ dev = [
     "build>=1.2,<2.0",
     "twine>=5.1,<7.0",
 ]
+ai = [
+    "pydantic-ai>=1.0,<2.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/safuh/FastApiBackbone"
