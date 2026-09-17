@@ -37,7 +37,18 @@ class ProjectGenerator:
         return package
 
     def generate(self) -> Path:
-        target = (self.output / self.name).resolve()
+        output_root = self.output.resolve()
+        target = (output_root / self.name).resolve()
+        try:
+            target.relative_to(output_root)
+        except ValueError as exc:
+            raise GenerationError(
+                f"project name escapes output directory: {self.name!r}"
+            ) from exc
+
+        if target == output_root:
+            raise GenerationError("project name must create a child directory")
+
         if target.exists():
             if not target.is_dir():
                 raise GenerationError(f"target exists and is not a directory: {target}")
@@ -62,11 +73,9 @@ class ProjectGenerator:
         )
         if self.include_ai:
             ai_test = (
-                "import pytest\n\n"
+                f"from {self.package}.ai.configuration import AISettings\n\n"
                 "\n"
-                "def test_ai_profile_is_optional() -> None:\n"
-                "    pytest.importorskip(\"pydantic_ai\")\n"
-                f"    from {self.package}.ai.configuration import AISettings\n\n"
+                "def test_ai_profile_configuration_is_optional() -> None:\n"
                 "    settings = AISettings(enabled=False)\n"
                 "    assert settings.enabled is False\n"
             )
