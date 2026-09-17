@@ -90,7 +90,7 @@ def render_default_template(
             ),
             TemplateFile(
                 "alembic.ini",
-                '''[alembic]\nscript_location = %(here)s/alembic\nsqlalchemy.url = sqlite+aiosqlite:///./app.db\n''',
+                '''[alembic]\nscript_location = %(here)s/alembic\n\nprepend_sys_path = .\n\n# The URL is supplied by the generated service configuration at runtime.\nsqlalchemy.url = sqlite+aiosqlite:///./app.db\n\n[loggers]\nkeys = root,sqlalchemy,alembic\n\n[handlers]\nkeys = console\n\n[formatters]\nkeys = generic\n\n[logger_root]\nlevel = WARN\nhandlers = console\nqualname =\n\n[logger_sqlalchemy]\nlevel = WARN\nhandlers =\nqualname = sqlalchemy.engine\n\n[logger_alembic]\nlevel = INFO\nhandlers = console\nqualname = alembic\n\n[handler_console]\nclass = StreamHandler\nargs = (sys.stderr,)\nlevel = NOTSET\nformatter = generic\n\n[formatter_generic]\nformat = %(levelname)-5.5s [%(name)s] %(message)s\ndatefmt = %H:%M:%S\n''',
             ),
             TemplateFile(
                 "alembic/env.py",
