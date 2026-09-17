@@ -74,12 +74,16 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Deterministic generated package layout.
 - [x] Generated-project smoke test template.
 - [x] Dedicated template-rendering boundary.
-- [ ] Versioned template registry and compatibility contract.
-- [ ] Full production Backbone template generation (database, migrations, auth, health, logging, tests, Docker).
+- [x] Versioned template version metadata (`0.2.0`).
+- [x] Production source template inherits verified API/auth/core/identity contracts.
+- [x] Generated Alembic environment and initial identity/refresh-token migration.
+- [x] Generated Dockerfile and PostgreSQL Compose path.
+- [x] Generated CI quality-gate workflow.
+- [ ] Formal template registry and compatibility matrix.
 - [ ] `db` migration helper commands.
 - [ ] `doctor` environment diagnostics.
 - [ ] OpenAPI client generation command.
-- [ ] Generated-project quality gates and CI template.
+- [~] Generated-project quality gates; generation assertions are implemented, end-to-end generated-project execution remains to be verified in CI.
 
 ### AI application architecture
 
@@ -95,6 +99,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Provider-neutral `provider:model` parsing and model routing boundary.
 - [x] AI infrastructure error taxonomy.
 - [x] Optional Pydantic AI runtime adapter with bounded async execution and retry configuration.
+- [x] Generated AI profile sources the canonical AI architecture instead of maintaining a second simplified implementation.
 - [ ] Concrete adapter/configuration profiles for OpenAI, Gemini and Ollama/OpenAI-compatible endpoints.
 - [ ] Structured-output agent templates.
 - [ ] AI dependency-injection contract for application services, repositories and request context.
