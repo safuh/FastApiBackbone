@@ -4,7 +4,14 @@ from unittest.mock import patch
 
 import pytest
 
-from fastapi_backbone.cli import DatabaseCommandError, _doctor, _run_alembic, build_parser
+from fastapi_backbone.cli import (
+    ClientGenerationError,
+    DatabaseCommandError,
+    _doctor,
+    _generate_client,
+    _run_alembic,
+    build_parser,
+)
 
 
 def test_db_parser_defaults_upgrade_to_head() -> None:
@@ -88,3 +95,43 @@ def test_doctor_parser_defaults_to_current_directory() -> None:
     args = build_parser().parse_args(["doctor"])
     assert args.command == "doctor"
     assert args.path == Path(".")
+
+def test_client_parser_accepts_spec_and_output() -> None:
+    args = build_parser().parse_args(
+        ["client", "generate", "--spec", "openapi.json", "--output", "generated-client"]
+    )
+    assert args.client_command == "generate"
+    assert args.spec == Path("openapi.json")
+    assert args.output == Path("generated-client")
+
+
+def test_generate_client_uses_openapi_python_client(tmp_path: Path) -> None:
+    spec = tmp_path / "openapi.json"
+    spec.write_text("{}", encoding="utf-8")
+    output = tmp_path / "client"
+
+    with patch("fastapi_backbone.cli.shutil.which", return_value="/usr/bin/openapi-python-client"):
+        with patch("fastapi_backbone.cli.subprocess.run") as run:
+            run.return_value.returncode = 0
+            assert _generate_client(spec=spec, url=None, output=output) == 0
+
+    assert output.is_dir()
+    assert run.call_args.args[0] == [
+        "/usr/bin/openapi-python-client",
+        "generate",
+        "--output-path",
+        str(output.resolve()),
+        "--path",
+        str(spec.resolve()),
+    ]
+    assert run.call_args.kwargs["check"] is False
+
+
+def test_generate_client_requires_external_tool(tmp_path: Path) -> None:
+    with patch("fastapi_backbone.cli.shutil.which", return_value=None):
+        with pytest.raises(ClientGenerationError, match="openapi-python-client is required"):
+            _generate_client(
+                spec=None,
+                url="https://example.test/openapi.json",
+                output=tmp_path / "client",
+            )
