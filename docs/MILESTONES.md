@@ -5,57 +5,27 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 ## Status legend
 
 - `[x]` Complete and verified
-- `[~]` Implemented but awaiting verification
+- `[~]` Implemented but awaiting verification / milestone in progress
 - `[ ]` Pending
 
 ## M1 — Core Foundation
 
 **Status: [x] Complete and verified**
 
-### Runtime contract
+- [x] Canonical development and production commands.
+- [x] Application factory and explicit development/test/production profiles.
+- [x] Async SQLAlchemy 2.x engine/session lifecycle and Unit of Work.
+- [x] Alembic-only schema migration mechanism.
+- [x] Liveness/readiness contract.
+- [x] Structured logging and request correlation IDs.
+- [x] Stable error envelope and explicit CORS policy.
+- [x] SQLite transaction tests and PostgreSQL integration tests.
+- [x] Alembic upgrade/downgrade/upgrade integration gate.
+- [x] Docker Compose healthcheck and smoke-test workflow.
+- [x] Python 3.11/3.12/3.13 CI gate.
+- [x] Full mypy application gate.
 
-- [x] Canonical development command: `make run` / `uv run uvicorn fastapi_backbone.app:create_app --factory --reload`
-- [x] Canonical production command: `make prod` / `uv run uvicorn fastapi_backbone.app:create_app --factory --host 0.0.0.0 --port 8000`
-- [x] Application factory at `fastapi_backbone.app:create_app`
-- [x] Explicit configuration profiles: `development`, `test`, `production`
-- [x] Production rejects debug mode and non-PostgreSQL database URLs
-- [x] Structured logging with configurable human-readable/JSON output
-- [x] Request correlation IDs propagated through responses and logs
-
-### Database contract
-
-- [x] Async SQLAlchemy 2.x engine and session factory
-- [x] Shared engine/session lifecycle owned by FastAPI lifespan
-- [x] Engine connectivity checked during non-test startup
-- [x] Engine disposed deterministically during shutdown
-- [x] Transaction-scoped `session_scope`
-- [x] Explicit `UnitOfWork` transaction boundary
-- [x] Alembic is the only schema migration mechanism
-- [x] Initial domain-neutral migration revision exists
-- [x] Production rule: migrations run as an explicit release operation, not per API process
-
-### Operational contract
-
-- [x] `/api/health/live` is process liveness and does not require database access
-- [x] `/api/health/ready` returns `503` until startup is complete or the database is unavailable
-- [x] Stable error envelope includes request ID
-- [x] CORS policy is explicitly configured
-
-### Verification contract
-
-- [x] Application smoke tests
-- [x] Startup/shutdown lifecycle tests
-- [x] SQLite session/UoW transaction tests
-- [x] PostgreSQL integration test with CI service container
-- [x] Alembic upgrade/downgrade/upgrade integration gate
-- [x] Docker Compose healthcheck
-- [x] Docker smoke-test script covering build, startup, health, readiness, and migration
-- [x] CI runs Python 3.11, 3.12, and 3.13
-- [x] Final CI run is green on the branch
-- [x] Final Docker smoke test is green in CI/local verification
-- [x] Full mypy gate has zero application errors
-
-**M1 acceptance gate:** all final verification requirements are green.
+**Acceptance gate:** all final verification requirements are green.
 
 ## Phase 2 — Database & migrations
 
@@ -97,16 +67,48 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 
 ## Phase 4 — Project generator / CLI
 
-**Status: [ ] Pending**
+**Status: [~] In progress**
 
-- [ ] `fastapi-backbone new` command.
-- [ ] Non-interactive flags for CI and automation.
-- [ ] Template versioning.
-- [ ] Generated backend smoke test.
-- [ ] Generated project quality gates.
+### Generator core
+
+- [x] `fastapi-backbone new` command foundation.
+- [x] Non-interactive project name/output flags.
+- [x] Safe refusal to overwrite non-empty directories by default.
+- [x] Explicit `--force` behavior for empty/existing targets.
+- [x] Deterministic generated package layout.
+- [x] Generated-project smoke test template.
+- [ ] Versioned template registry and compatibility contract.
+- [ ] Full production Backbone template generation (database, migrations, auth, health, logging, tests, Docker).
 - [ ] `db` migration helper commands.
 - [ ] `doctor` environment diagnostics.
 - [ ] OpenAPI client generation command.
+- [ ] Generated-project quality gates and CI template.
+
+### AI application architecture
+
+- [x] Explicit optional `--ai` profile.
+- [x] Pydantic AI remains an optional dependency rather than a core runtime dependency.
+- [x] Dedicated generated `ai/` boundary.
+- [x] Runtime model identifier rather than provider-specific business logic.
+- [x] Initial AI configuration contract.
+- [x] Initial Pydantic AI agent factory.
+- [ ] Provider/model adapter contract with supported OpenAI, Gemini and Ollama/OpenAI-compatible configurations.
+- [ ] Structured-output agent templates.
+- [ ] AI dependency-injection contract for application services, repositories and request context.
+- [ ] Tool runtime with deterministic authorization and allowlists.
+- [ ] AI streaming contract.
+- [ ] AI retries, timeouts, circuit breaking and fallback policy.
+- [ ] Model routing policy.
+- [ ] Token, latency and estimated-cost telemetry.
+- [ ] Prompt versioning and prompt test fixtures.
+- [ ] AI evaluation/regression framework.
+- [ ] Guardrails and prompt-injection defenses.
+- [ ] Human-in-the-loop approval boundary for consequential actions.
+- [ ] Optional RAG profile.
+- [ ] Optional background AI job/worker profile.
+- [ ] MCP/tool interoperability profile where it has a stable generated-project contract.
+
+**Generator acceptance:** a clean installation can generate a documented project non-interactively; generated projects pass their own quality gates; AI-enabled projects remain provider-agnostic and keep authorization/execution outside the LLM.
 
 ## Phase 5 — Flutter client
 
@@ -164,7 +166,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 **Status: [ ] Pending**
 
 - [ ] Public documentation site.
-- [ ] Example applications.
+- [ ] Example applications, including one AI-enabled example.
 - [ ] API stability policy.
 - [ ] Semantic versioning policy.
 - [ ] Changelog/release automation.
@@ -181,6 +183,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [ ] No known critical/high security issues.
 - [ ] Reference application deployed successfully.
 - [ ] Generator produces a complete documented stack.
+- [ ] Generator's optional AI architecture verified end-to-end.
 - [ ] Flutter client integration verified.
 - [ ] Docker and Kubernetes paths verified.
 - [ ] Documentation reviewed end-to-end.
