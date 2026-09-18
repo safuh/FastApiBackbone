@@ -234,4 +234,36 @@ def test_generated_ai_routing_policy_rejects_unknown_route() -> None:
         policy.resolve("missing", router())
 '''
             files.append(TemplateFile("tests/test_ai_routing_policy.py", routing_policy_test))
+            telemetry_test = f'''import pytest
+
+from {self.package}.ai import (
+    AIModel,
+    AIModelPricing,
+    AIRequest,
+    AIResponse,
+    AIUsageTelemetry,
+)
+
+
+def test_generated_ai_telemetry_records_usage_and_cost() -> None:
+    telemetry = AIUsageTelemetry(
+        {{"gpt-test": AIModelPricing(input_cost_per_token=0.001, output_cost_per_token=0.002)}}
+    )
+    model = AIModel(provider="openai", model="gpt-test")
+    usage = telemetry.observe(
+        AIRequest(prompt="hello", model=model),
+        AIResponse(
+            content="world",
+            model=model,
+            input_tokens=10,
+            output_tokens=5,
+        ),
+        latency_seconds=1.25,
+    )
+
+    assert usage.total_tokens == 15
+    assert usage.latency_seconds == 1.25
+    assert usage.estimated_cost == pytest.approx(0.02)
+'''
+            files.append(TemplateFile("tests/test_ai_telemetry.py", telemetry_test))
         return tuple(files)
