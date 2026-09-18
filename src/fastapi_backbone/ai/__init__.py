@@ -19,6 +19,7 @@ from .profiles import (
 )
 from .providers import AIProviderRegistry
 from .structured import create_structured_agent
+from .tools import AITool, AIToolRegistry, AIToolRuntime
 
 __all__ = [
     "AIModel",
@@ -30,6 +31,9 @@ __all__ = [
     "AIResponse",
     "AIServiceDependencies",
     "AISettings",
+    "AITool",
+    "AIToolRegistry",
+    "AIToolRuntime",
     "AIProviderProfile",
     "GEMINI_PROFILE",
     "OLLAMA_PROFILE",
