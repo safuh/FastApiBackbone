@@ -80,7 +80,9 @@ PY
     exit 1
   fi
   test -f "$project/client/pyproject.toml"
-  test -d "$project/client/$package"
+  client_package="$(find "$project/client" -mindepth 1 -maxdepth 1 -type d -name "*_client" -print -quit)"
+  test -n "$client_package"
+  test -f "$client_package/__init__.py"
   popd >/dev/null
 }
 
