@@ -25,6 +25,13 @@ from .profiles import (
     get_provider_profile,
 )
 from .providers import AIProviderRegistry
+from .resilience import (
+    AICircuitBreaker,
+    AICircuitOpenError,
+    AIResilienceError,
+    AIResiliencePolicy,
+    ResilientAIProvider,
+)
 from .structured import create_structured_agent
 from .tools import AITool, AIToolRegistry, AIToolRuntime
 
@@ -44,12 +51,17 @@ __all__ = [
     "AIToolRegistry",
     "AIToolRuntime",
     "AIProviderProfile",
+    "AICircuitBreaker",
+    "AICircuitOpenError",
+    "AIResilienceError",
+    "AIResiliencePolicy",
     "GEMINI_PROFILE",
     "OLLAMA_PROFILE",
     "OPENAI_COMPATIBLE_PROFILE",
     "ModelRoute",
     "RepositoryFactory",
     "OPENAI_PROFILE",
+    "ResilientAIProvider",
     "create_structured_agent",
     "get_provider_profile",
 ]
