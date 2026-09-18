@@ -8,7 +8,6 @@ contracts without coupling domain code to a vendor.
 from .configuration import AISettings
 from .contracts import AIModel, AIProvider, AIRequest, AIResponse
 from .model_router import AIModelRouter, ModelRoute
-from .providers import AIProviderRegistry
 from .profiles import (
     GEMINI_PROFILE,
     OLLAMA_PROFILE,
@@ -17,6 +16,7 @@ from .profiles import (
     AIProviderProfile,
     get_provider_profile,
 )
+from .providers import AIProviderRegistry
 
 __all__ = [
     "AIModel",
