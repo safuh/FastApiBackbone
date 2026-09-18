@@ -104,7 +104,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Structured-output agent templates; generated AI projects pass the structured-agent template tests and full CI/generated-project gate.
 - [x] AI dependency-injection contract for application services, repositories and request context; request-scoped provider/session/repository resolution is covered by tests and the full CI/generated-project gate is green.
 - [x] Tool runtime with deterministic authorization and allowlists; full CI, generated-project smoke, Security, and Secret scanning are green for commit `46dc881f06fdd848a25569ba4295898f4f218ee8` (CI run `35349459342`).
-- [ ] AI streaming contract.
+- [x] AI streaming contract; full CI, generated-project smoke, Security, and Secret scanning are green for commit `ef73612f1a7f4bd24dcdec256758034a35facd89` (CI run `35350281269`).
 - [ ] AI retries, timeouts, circuit breaking and fallback policy beyond the initial adapter boundary.
 - [ ] Model routing policy beyond explicit provider/model resolution.
 - [ ] Token, latency and estimated-cost telemetry.
