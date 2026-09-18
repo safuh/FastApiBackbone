@@ -6,6 +6,7 @@ may be implemented by Pydantic AI today and another runtime later.
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -39,9 +40,27 @@ class AIResponse:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
+@dataclass(frozen=True, slots=True)
+class AIStreamChunk:
+    """One ordered, provider-neutral unit emitted during a streamed response."""
+
+    content: str
+    model: AIModel
+    is_final: bool = False
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
 class AIProvider(Protocol):
     """Port implemented by a concrete AI runtime/provider adapter."""
 
     async def generate(self, request: AIRequest) -> AIResponse:
-        """Generate a response without exposing provider details upstream."""
+        """Generate a response without exposing provider details."""
+        ...
+
+
+class AIStreamingProvider(AIProvider, Protocol):
+    """Optional streaming port for providers that support incremental output."""
+
+    def stream(self, request: AIRequest) -> AsyncIterator[AIStreamChunk]:
+        """Yield ordered chunks and exactly one final chunk."""
         ...
