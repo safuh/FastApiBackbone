@@ -120,4 +120,45 @@ def test_structured_agent_template_rejects_empty_model() -> None:
         raise AssertionError("empty AI model should fail")
 '''
             files.append(TemplateFile("tests/test_ai_structured.py", structured_test))
+            dependency_test = f'''from types import SimpleNamespace
+
+from {self.package}.ai.dependencies import AIRequestContext, AIServiceDependencies
+
+
+class FakeProvider:
+    async def generate(self, request):  # type: ignore[no-untyped-def]
+        raise NotImplementedError
+
+
+class FakeRepository:
+    def __init__(self, session) -> None:  # type: ignore[no-untyped-def]
+        self.session = session
+
+
+def test_ai_request_context_binds_provider_repository_and_request_metadata() -> None:
+    session = SimpleNamespace()
+    provider = FakeProvider()
+
+    def repository_factory(repository_type, bound_session):  # type: ignore[no-untyped-def]
+        return repository_type(bound_session)
+
+    context = AIServiceDependencies(
+        provider=provider,
+        repository_factory=repository_factory,
+    ).for_request(
+        request_id="req-123",
+        session=session,
+        subject="user-123",
+        metadata={{"source": "test"}},
+    )
+
+    assert isinstance(context, AIRequestContext)
+    assert context.request_id == "req-123"
+    assert context.session is session
+    assert context.provider is provider
+    assert context.subject == "user-123"
+    assert context.metadata == {{"source": "test"}}
+    assert context.repository(FakeRepository).session is session
+'''
+            files.append(TemplateFile("tests/test_ai_dependencies.py", dependency_test))
         return tuple(files)
