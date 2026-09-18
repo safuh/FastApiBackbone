@@ -82,7 +82,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Formal template registry and compatibility metadata.
 - [x] `db` migration helper commands (`upgrade`, `downgrade`, `current`, `history`).
 - [x] `doctor` environment diagnostics.
-- [ ] OpenAPI client generation command.
+- [x] OpenAPI client generation command; default and AI projects pass genuine `openapi-python-client` generation plus the public wrapper in CI.
 - [x] Generated-project quality gates; default and AI projects pass end-to-end generation, lint, type checking, tests, migration upgrade/downgrade/upgrade, Docker smoke, Kubernetes validation, security, and secret scanning in CI.
 
 ### AI application architecture
