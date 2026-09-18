@@ -34,6 +34,7 @@ from .resilience import (
 )
 from .routing_policy import AIModelRoutePolicy
 from .structured import create_structured_agent
+from .telemetry import AIModelPricing, AIUsage, AIUsageTelemetry
 from .tools import AITool, AIToolRegistry, AIToolRuntime
 
 __all__ = [
@@ -49,6 +50,9 @@ __all__ = [
     "AISettings",
     "AIStreamChunk",
     "AIStreamingProvider",
+    "AIModelPricing",
+    "AIUsage",
+    "AIUsageTelemetry",
     "AITool",
     "AIToolRegistry",
     "AIToolRuntime",
