@@ -7,6 +7,7 @@ contracts without coupling domain code to a vendor.
 
 from .configuration import AISettings
 from .contracts import AIModel, AIProvider, AIRequest, AIResponse
+from .dependencies import AIRequestContext, AIServiceDependencies, RepositoryFactory
 from .model_router import AIModelRouter, ModelRoute
 from .profiles import (
     GEMINI_PROFILE,
@@ -25,14 +26,17 @@ __all__ = [
     "AIProvider",
     "AIProviderRegistry",
     "AIRequest",
+    "AIRequestContext",
     "AIResponse",
+    "AIServiceDependencies",
     "AISettings",
     "AIProviderProfile",
     "GEMINI_PROFILE",
     "OLLAMA_PROFILE",
     "OPENAI_COMPATIBLE_PROFILE",
-    "OPENAI_PROFILE",
     "ModelRoute",
+    "RepositoryFactory",
+    "OPENAI_PROFILE",
     "create_structured_agent",
     "get_provider_profile",
 ]
