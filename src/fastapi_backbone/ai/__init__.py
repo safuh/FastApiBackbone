@@ -9,6 +9,14 @@ from .configuration import AISettings
 from .contracts import AIModel, AIProvider, AIRequest, AIResponse
 from .model_router import AIModelRouter, ModelRoute
 from .providers import AIProviderRegistry
+from .profiles import (
+    GEMINI_PROFILE,
+    OLLAMA_PROFILE,
+    OPENAI_COMPATIBLE_PROFILE,
+    OPENAI_PROFILE,
+    AIProviderProfile,
+    get_provider_profile,
+)
 
 __all__ = [
     "AIModel",
@@ -18,5 +26,11 @@ __all__ = [
     "AIRequest",
     "AIResponse",
     "AISettings",
+    "AIProviderProfile",
+    "GEMINI_PROFILE",
+    "OLLAMA_PROFILE",
+    "OPENAI_COMPATIBLE_PROFILE",
+    "OPENAI_PROFILE",
     "ModelRoute",
+    "get_provider_profile",
 ]
