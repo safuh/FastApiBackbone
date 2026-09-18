@@ -9,14 +9,15 @@ from .configuration import AISettings
 from .contracts import AIModel, AIProvider, AIRequest, AIResponse
 from .model_router import AIModelRouter, ModelRoute
 from .profiles import (
+    AIProviderProfile,
     GEMINI_PROFILE,
     OLLAMA_PROFILE,
     OPENAI_COMPATIBLE_PROFILE,
     OPENAI_PROFILE,
-    AIProviderProfile,
     get_provider_profile,
 )
 from .providers import AIProviderRegistry
+from .structured import create_structured_agent
 
 __all__ = [
     "AIModel",
@@ -32,5 +33,6 @@ __all__ = [
     "OPENAI_COMPATIBLE_PROFILE",
     "OPENAI_PROFILE",
     "ModelRoute",
+    "create_structured_agent",
     "get_provider_profile",
 ]
