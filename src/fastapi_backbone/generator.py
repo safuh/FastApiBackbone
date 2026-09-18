@@ -180,4 +180,33 @@ async def test_ai_tool_runtime_enforces_allowlist() -> None:
         raise AssertionError("unallowlisted tool should fail")
 '''
             files.append(TemplateFile("tests/test_ai_tools.py", tools_test))
+            streaming_test = f'''from {self.package}.ai import (
+    AIModel,
+    AIRequest,
+    AIStreamChunk,
+    AIStreamingProvider,
+)
+
+
+async def test_ai_streaming_template_preserves_chunk_order() -> None:
+    model = AIModel(provider="example", model="example-model")
+    request = AIRequest(prompt="hello", model=model)
+
+    class FakeProvider:
+        async def _chunks(self):
+            yield AIStreamChunk(content="hello ", model=model)
+            yield AIStreamChunk(content="world", model=model)
+            yield AIStreamChunk(content="", model=model, is_final=True)
+
+        def stream(self, request):
+            return self._chunks()
+
+    provider: AIStreamingProvider = FakeProvider()
+    chunks = [chunk async for chunk in provider.stream(request)]
+
+    assert [chunk.content for chunk in chunks] == ["hello ", "world", ""]
+    assert [chunk.is_final for chunk in chunks] == [False, False, True]
+    assert all(chunk.model == model for chunk in chunks)
+'''
+            files.append(TemplateFile("tests/test_ai_streaming.py", streaming_test))
         return tuple(files)
