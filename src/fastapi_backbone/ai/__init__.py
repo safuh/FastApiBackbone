@@ -17,15 +17,14 @@ from .contracts import (
 from .dependencies import AIRequestContext, AIServiceDependencies, RepositoryFactory
 from .model_router import AIModelRouter, ModelRoute
 from .profiles import (
+    AIProviderProfile,
     GEMINI_PROFILE,
     OLLAMA_PROFILE,
     OPENAI_COMPATIBLE_PROFILE,
     OPENAI_PROFILE,
-    AIProviderProfile,
     get_provider_profile,
 )
 from .providers import AIProviderRegistry
-from .routing_policy import AIModelRoutePolicy
 from .resilience import (
     AICircuitBreaker,
     AICircuitOpenError,
@@ -33,6 +32,7 @@ from .resilience import (
     AIResiliencePolicy,
     ResilientAIProvider,
 )
+from .routing_policy import AIModelRoutePolicy
 from .structured import create_structured_agent
 from .tools import AITool, AIToolRegistry, AIToolRuntime
 
