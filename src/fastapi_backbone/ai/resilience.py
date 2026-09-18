@@ -8,14 +8,11 @@ from __future__ import annotations
 
 import asyncio
 import time
-from collections.abc import Awaitable, Callable, Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TypeVar
 
 from .contracts import AIProvider, AIRequest, AIResponse
 from .errors import AIError
-
-T = TypeVar("T")
 
 
 class AICircuitOpenError(AIError):
@@ -47,7 +44,7 @@ class AIResiliencePolicy:
 
 
 class AICircuitBreaker:
-    """Small async-safe circuit breaker with closed/open/half-open states."""
+    """Small circuit breaker with closed and open states plus timed recovery."""
 
     def __init__(self, *, failure_threshold: int = 3, recovery_seconds: float = 30.0) -> None:
         if failure_threshold < 1:
@@ -77,9 +74,6 @@ class AICircuitBreaker:
         self._failures += 1
         if self._failures >= self._failure_threshold:
             self._opened_at = time.monotonic()
-
-
-Fallback = Callable[[AIRequest], AIResponse | Awaitable[AIResponse]]
 
 
 class ResilientAIProvider:
@@ -119,7 +113,9 @@ class ResilientAIProvider:
                     return response
                 except Exception:
                     continue
-            raise AIResilienceError("AI provider and all configured fallbacks failed") from primary_error
+            raise AIResilienceError(
+                "AI provider and all configured fallbacks failed"
+            ) from primary_error
         self._circuit.record_success()
         return response
 
