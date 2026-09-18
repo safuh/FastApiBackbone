@@ -4,9 +4,9 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 
 ## Status legend
 
-- `[x]` Complete and verified
-- `[~]` Implemented but awaiting verification / milestone in progress
-- `[ ]` Pending
+- [x] Complete and verified
+- [~] Implemented but awaiting verification / milestone in progress
+- [ ] Pending
 
 ## M1 — Core Foundation
 
@@ -100,7 +100,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] AI infrastructure error taxonomy.
 - [x] Optional Pydantic AI runtime adapter with bounded async execution and retry configuration.
 - [x] Generated AI profile sources the canonical AI architecture instead of maintaining a second simplified implementation.
-- [ ] Concrete adapter/configuration profiles for OpenAI, Gemini and Ollama/OpenAI-compatible endpoints.
+- [x] Concrete adapter/configuration profiles for OpenAI, Gemini and Ollama/OpenAI-compatible endpoints; profiles are tested and the full CI/generated-project gate is green.
 - [ ] Structured-output agent templates.
 - [ ] AI dependency-injection contract for application services, repositories and request context.
 - [ ] Tool runtime with deterministic authorization and allowlists.
