@@ -102,7 +102,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] Generated AI profile sources the canonical AI architecture instead of maintaining a second simplified implementation.
 - [x] Concrete adapter/configuration profiles for OpenAI, Gemini and Ollama/OpenAI-compatible endpoints; profiles are tested and the full CI/generated-project gate is green.
 - [x] Structured-output agent templates; generated AI projects pass the structured-agent template tests and full CI/generated-project gate.
-- [ ] AI dependency-injection contract for application services, repositories and request context.
+- [x] AI dependency-injection contract for application services, repositories and request context; request-scoped provider/session/repository resolution is covered by tests and the full CI/generated-project gate is green.
 - [ ] Tool runtime with deterministic authorization and allowlists.
 - [ ] AI streaming contract.
 - [ ] AI retries, timeouts, circuit breaking and fallback policy beyond the initial adapter boundary.
