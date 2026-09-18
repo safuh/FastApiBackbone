@@ -82,4 +82,42 @@ class ProjectGenerator:
                 "    assert settings.enabled is False\n"
             )
             files.append(TemplateFile("tests/test_ai.py", ai_test))
+            structured_test = f'''from types import SimpleNamespace
+
+from pydantic import BaseModel
+
+from {self.package}.ai.structured import create_structured_agent
+
+
+class Answer(BaseModel):
+    value: str
+
+
+def test_structured_agent_template_uses_declared_output_type(monkeypatch) -> None:
+    class FakeAgent:
+        def __init__(self, *, model, output_type) -> None:
+            self.model = model
+            self.output_type = output_type
+
+    monkeypatch.setitem(
+        __import__("sys").modules,
+        "pydantic_ai",
+        SimpleNamespace(Agent=FakeAgent),
+    )
+
+    agent = create_structured_agent("openai:gpt-4o-mini", Answer)
+
+    assert agent.model == "openai:gpt-4o-mini"
+    assert agent.output_type is Answer
+
+
+def test_structured_agent_template_rejects_empty_model() -> None:
+    try:
+        create_structured_agent("", Answer)
+    except ValueError as exc:
+        assert str(exc) == "AI model identifier cannot be empty"
+    else:
+        raise AssertionError("empty AI model should fail")
+'''
+            files.append(TemplateFile("tests/test_ai_structured.py", structured_test))
         return tuple(files)
