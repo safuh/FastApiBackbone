@@ -209,4 +209,29 @@ async def test_ai_streaming_template_preserves_chunk_order() -> None:
     assert all(chunk.model == model for chunk in chunks)
 '''
             files.append(TemplateFile("tests/test_ai_streaming.py", streaming_test))
+            routing_policy_test = f'''import pytest
+
+from {self.package}.ai import AIModelRoutePolicy, AIModelRouter, AIProviderRegistry
+from {self.package}.ai.errors import AIConfigurationError
+
+
+def router() -> AIModelRouter:
+    return AIModelRouter(AIProviderRegistry())
+
+
+def test_generated_ai_routing_policy_resolves_logical_route() -> None:
+    policy = AIModelRoutePolicy({{"default": "OPENAI:gpt-test"}})
+    model = policy.resolve(" DEFAULT ", router())
+
+    assert model.provider == "openai"
+    assert model.model == "gpt-test"
+
+
+def test_generated_ai_routing_policy_rejects_unknown_route() -> None:
+    policy = AIModelRoutePolicy({{"default": "openai:gpt-test"}})
+
+    with pytest.raises(AIConfigurationError, match="not configured"):
+        policy.resolve("missing", router())
+'''
+            files.append(TemplateFile("tests/test_ai_routing_policy.py", routing_policy_test))
         return tuple(files)
