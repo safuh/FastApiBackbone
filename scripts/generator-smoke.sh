@@ -61,13 +61,10 @@ print(result.stderr, end="")
 raise SystemExit(0)
 PY
 
-  if [ ! -f "$project/client-no-hooks/pyproject.toml" ] || [ ! -d "$project/client-no-hooks/$package" ]; then
-    echo "External client generation failed with post-hooks disabled"
-    echo "OpenAPI metadata:"
-    uv run python -c "import json; s=json.load(open('openapi.json')); print('openapi=', s.get('openapi')); print('title=', s.get('info', {}).get('title'))"
-    find "$project/client-no-hooks" -maxdepth 3 -type f -print 2>/dev/null || true
-    exit 1
-  fi
+  test -f "$project/client-no-hooks/pyproject.toml"
+  client_package="$(find "$project/client-no-hooks" -mindepth 1 -maxdepth 1 -type d -name "*_client" -print -quit)"
+  test -n "$client_package"
+  test -f "$client_package/__init__.py"
 
   rm -rf "$project/client-no-hooks"
   if ! uv run --project "$repo_root" --with openapi-python-client fastapi-backbone client generate \
