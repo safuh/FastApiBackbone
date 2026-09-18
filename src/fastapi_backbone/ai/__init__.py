@@ -25,6 +25,7 @@ from .profiles import (
     get_provider_profile,
 )
 from .providers import AIProviderRegistry
+from .routing_policy import AIModelRoutePolicy
 from .resilience import (
     AICircuitBreaker,
     AICircuitOpenError,
@@ -38,6 +39,7 @@ from .tools import AITool, AIToolRegistry, AIToolRuntime
 __all__ = [
     "AIModel",
     "AIModelRouter",
+    "AIModelRoutePolicy",
     "AIProvider",
     "AIProviderRegistry",
     "AIRequest",
