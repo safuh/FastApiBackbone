@@ -6,7 +6,14 @@ contracts without coupling domain code to a vendor.
 """
 
 from .configuration import AISettings
-from .contracts import AIModel, AIProvider, AIRequest, AIResponse
+from .contracts import (
+    AIModel,
+    AIProvider,
+    AIRequest,
+    AIResponse,
+    AIStreamChunk,
+    AIStreamingProvider,
+)
 from .dependencies import AIRequestContext, AIServiceDependencies, RepositoryFactory
 from .model_router import AIModelRouter, ModelRoute
 from .profiles import (
@@ -31,6 +38,8 @@ __all__ = [
     "AIResponse",
     "AIServiceDependencies",
     "AISettings",
+    "AIStreamChunk",
+    "AIStreamingProvider",
     "AITool",
     "AIToolRegistry",
     "AIToolRuntime",
