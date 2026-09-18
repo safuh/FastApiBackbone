@@ -161,4 +161,23 @@ def test_ai_request_context_binds_provider_repository_and_request_metadata() -> 
     assert context.repository(FakeRepository).session is session
 '''
             files.append(TemplateFile("tests/test_ai_dependencies.py", dependency_test))
+            tools_test = f'''from {self.package}.ai import AITool, AIToolRegistry, AIToolRuntime
+from {self.package}.ai.errors import AIError
+
+
+async def test_ai_tool_runtime_enforces_allowlist() -> None:
+    registry = AIToolRegistry()
+    registry.register(AITool(name="echo", handler=lambda arguments: arguments["value"]))
+    runtime = AIToolRuntime(registry, allowlist={"echo"})
+
+    assert await runtime.execute("echo", {{\"value\": \"hello\"}}) == "hello"
+
+    try:
+        await runtime.execute("delete", {{}})
+    except AIError as exc:
+        assert "not allowed" in str(exc)
+    else:
+        raise AssertionError("unallowlisted tool should fail")
+'''
+            files.append(TemplateFile("tests/test_ai_tools.py", tools_test))
         return tuple(files)
