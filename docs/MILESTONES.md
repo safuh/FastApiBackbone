@@ -105,7 +105,7 @@ This is the living implementation tracker for FastAPI Backbone. **A checkbox mea
 - [x] AI dependency-injection contract for application services, repositories and request context; request-scoped provider/session/repository resolution is covered by tests and the full CI/generated-project gate is green.
 - [x] Tool runtime with deterministic authorization and allowlists; full CI, generated-project smoke, Security, and Secret scanning are green for commit `46dc881f06fdd848a25569ba4295898f4f218ee8` (CI run `35349459342`).
 - [x] AI streaming contract; full CI, generated-project smoke, Security, and Secret scanning are green for commit `ef73612f1a7f4bd24dcdec256758034a35facd89` (CI run `35350281269`).
-- [ ] AI retries, timeouts, circuit breaking and fallback policy beyond the initial adapter boundary.
+- [x] AI retries, timeouts, circuit breaking and fallback policy beyond the initial adapter boundary; full CI, generated-project smoke, Security, and Secret scanning are green for commit `052003b16e26df26cd058ff176399cd8dab89dc5` (CI run `35352149926`).
 - [ ] Model routing policy beyond explicit provider/model resolution.
 - [ ] Token, latency and estimated-cost telemetry.
 - [ ] Prompt versioning and prompt test fixtures.
