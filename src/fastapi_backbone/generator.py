@@ -168,9 +168,9 @@ from {self.package}.ai.errors import AIError
 async def test_ai_tool_runtime_enforces_allowlist() -> None:
     registry = AIToolRegistry()
     registry.register(AITool(name="echo", handler=lambda arguments: arguments["value"]))
-    runtime = AIToolRuntime(registry, allowlist={"echo"})
+    runtime = AIToolRuntime(registry, allowlist=set(("echo",)))
 
-    assert await runtime.execute("echo", {{\"value\": \"hello\"}}) == "hello"
+    assert await runtime.execute("echo", {{"value": "hello"}}) == "hello"
 
     try:
         await runtime.execute("delete", {{}})
