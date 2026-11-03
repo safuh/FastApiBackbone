@@ -10,7 +10,7 @@ This tracker describes the supported FastAPI Backbone MVP. A checkbox means the 
 
 ## M1 — Application foundation
 
-**Implementation status: complete; final branch verification required after scope cleanup.**
+**Status: complete and verified.**
 
 - [x] Python src-layout package and application factory.
 - [x] Development, test, and production configuration profiles.
@@ -24,7 +24,7 @@ This tracker describes the supported FastAPI Backbone MVP. A checkbox means the 
 
 ## M2 — Persistence and migrations
 
-**Implementation status: complete; final branch verification required.**
+**Status: complete and verified.**
 
 - [x] Async SQLAlchemy 2.x engine and session factory.
 - [x] PostgreSQL/asyncpg production driver.
@@ -39,7 +39,7 @@ This tracker describes the supported FastAPI Backbone MVP. A checkbox means the 
 
 ## M3 — Optional identity and JWT
 
-**Implementation status: implemented; consumers must explicitly configure it.**
+**Status: implemented and verified; consumers must explicitly configure it.**
 
 - [x] Password hashing with Argon2.
 - [x] Generic invalid-credential behavior.
@@ -57,7 +57,7 @@ Authentication remains optional at the composition root. Production applications
 
 ## M4 — Docker and local development
 
-**Implementation status: implemented; final smoke verification required.**
+**Status: complete and verified.**
 
 - [x] Locked dependency installation using uv.lock.
 - [x] Non-root runtime container.
@@ -67,11 +67,11 @@ Authentication remains optional at the composition root. Production applications
 - [x] Production Compose definition with external database credentials.
 - [x] Explicit one-shot Alembic migration before API startup.
 - [x] Docker smoke-test script.
-- [ ] Successful Docker smoke test on this release branch.
+- [x] Docker smoke test passes on the release branch.
 
 ## M5 — Kubernetes deployment
 
-**Implementation status: manifests and deployment documentation implemented; final CI verification required.**
+**Status: complete and verified.**
 
 - [x] Canonical Kustomize base under k8s/base.
 - [x] API Deployment and ClusterIP Service.
@@ -83,26 +83,26 @@ Authentication remains optional at the composition root. Production applications
 - [x] Optional Ingress example.
 - [x] Optional HPA overlay.
 - [x] Rollout and rollback instructions.
-- [ ] Successful render of all overlays on this release branch.
+- [x] Production, migration, and HPA overlays render successfully in CI.
 
 ## M6 — Release verification
 
-**Status: pending final CI evidence.**
+**Status: complete and verified on the release candidate commit.**
 
-- [ ] Ruff passes.
-- [ ] Mypy passes with no application errors.
-- [ ] Full test suite passes on Python 3.11, 3.12, and 3.13.
-- [ ] PostgreSQL integration and migration tests pass.
-- [ ] Package build and Twine validation pass.
-- [ ] Docker smoke test passes.
-- [ ] Production, migration, and HPA Kustomize overlays render successfully.
-- [ ] Secret scanning and dependency security workflows pass.
-- [ ] Documentation commands match the actual repository.
-- [ ] No PydanticAI, Flutter, or stale duplicate Kubernetes implementation remains.
+- [x] Ruff passes.
+- [x] Mypy passes with no application errors.
+- [x] Full test suite passes on Python 3.11, 3.12, and 3.13.
+- [x] PostgreSQL integration and migration tests pass.
+- [x] Package build and Twine validation pass.
+- [x] Docker smoke test passes.
+- [x] Production, migration, and HPA Kustomize overlays render successfully.
+- [x] Secret scanning and dependency security workflows pass.
+- [x] Documentation commands match the actual repository.
+- [x] No PydanticAI, Flutter, or stale duplicate Kubernetes implementation remains.
 
 ## MVP release definition
 
-The MVP is ready for release when every M6 gate is green on the release commit. Do not mark a gate complete based only on the existence of a workflow or manifest.
+The MVP is ready for release when every M6 gate is green on the release commit. The release candidate CI run passed all test matrices, package checks, Docker smoke, Kubernetes rendering, secret scanning, and dependency audit.
 
 The MVP does not promise that every consuming application is automatically production-secure. Applications must still configure secrets, TLS, database access, CORS, backups, monitoring, rate limits, and authorization policy for their deployment environment.
 
