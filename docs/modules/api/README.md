@@ -1,6 +1,6 @@
 # API Module
 
-The API module is the transport boundary. It contains routers, request/response schemas, dependencies, and system endpoints.
+The API module is the HTTP transport boundary. It contains routers, Pydantic request/response schemas, dependencies, and operational endpoints.
 
 ## Rules
 
@@ -8,11 +8,10 @@ The API module is the transport boundary. It contains routers, request/response 
 - Delegate use cases to application services.
 - Validate external input with Pydantic.
 - Return stable, documented response contracts.
-- Keep authentication/authorization dependencies explicit.
+- Keep authentication dependencies explicit.
 - Version public APIs when compatibility requires it.
+- Keep health endpoints independent of product-specific domain modules.
 
-The current reference API exposes health endpoints. Domain routers are intentionally absent because FastAPI Backbone is not a business application.
+The reference API exposes health endpoints and an optional authentication router. Authentication returns a controlled 503 response until the consuming application supplies an authentication composition factory.
 
-## Future generator
-
-The project generator will create domain feature modules beneath the API boundary without changing the foundation's core package.
+There is no frontend or mobile-client dependency. FastAPI's OpenAPI document is the API contract for any external client.
