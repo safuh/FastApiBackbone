@@ -1,32 +1,33 @@
-# ADR 0001: Foundation Architecture
+# ADR 0001: Backend Foundation Architecture
 
 - Status: Accepted
 - Date: 2026-08-28
 
 ## Context
 
-FastAPI applications commonly repeat the same configuration, persistence, migration, authentication, testing, and deployment setup. A reusable foundation should reduce this repetition without becoming a domain-specific framework.
+FastAPI applications repeatedly rebuild configuration, persistence, migration, authentication, testing, and deployment infrastructure. FastAPI Backbone should provide these capabilities without coupling consumers to a business domain or frontend.
 
 ## Decision
 
-FastAPI Backbone uses a src-layout Python package with these primary concerns:
+FastAPI Backbone uses a src-layout Python package with the following architecture:
 
-1. FastAPI for the HTTP boundary.
-2. Pydantic v2 for validation/configuration.
-3. SQLAlchemy 2.x async APIs for persistence.
-4. Alembic for schema migrations.
-5. JWT/OAuth2 security primitives behind an explicit authentication boundary.
-6. OpenAPI as the contract for generated clients, including Flutter.
-7. Docker for reproducible application artifacts.
-8. Kubernetes/Kustomize as an optional deployment target.
-9. A generator/CLI as the long-term distribution mechanism.
+1. FastAPI is the HTTP boundary and OpenAPI contract.
+2. Pydantic v2 validates request/response data; Pydantic Settings provides typed environment configuration.
+3. SQLAlchemy 2.x async APIs provide persistence and transaction boundaries.
+4. Alembic owns schema history and runs as an explicit deployment operation.
+5. PostgreSQL is the production database; SQLite is available for lightweight local development and tests.
+6. Optional password/JWT authentication is composed explicitly by the consuming application.
+7. Docker packages a reproducible, non-root runtime image.
+8. Docker Compose provides the local API/PostgreSQL workflow.
+9. Kubernetes/Kustomize provides an optional production deployment path.
 
-The foundation remains domain-neutral. Product applications own business models, bounded contexts, and product-specific policies.
+The project is backend-only and remains domain-neutral.
 
 ## Consequences
 
-- The reference package is reusable without forcing Flutter or Kubernetes dependencies.
-- Generated projects can own their source tree and evolve independently.
-- Authentication can be hardened without coupling it to the database or transport layer.
-- OpenAPI remains the client contract.
-- Production readiness is verified by tests and deployment gates rather than by the presence of templates alone.
+- Consumers can use the backend foundation without a frontend or mobile client.
+- Pydantic remains a first-class part of validation and configuration.
+- Application processes do not independently run migrations.
+- Production secrets are supplied at runtime and are not committed.
+- Docker and Kubernetes remain optional deployment targets.
+- The architecture does not require PydanticAI, AI providers, Flutter, or a project generator.
