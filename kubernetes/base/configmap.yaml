@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: fastapi-backbone-config
-data:
-  APP_NAME: FastAPI Backbone
-  ENVIRONMENT: production
-  LOG_JSON: "true"
