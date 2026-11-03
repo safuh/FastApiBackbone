@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "fastapi-backbone"
 version = "0.1.0"
-description = "Production-grade infrastructure and project-generation foundation for FastAPI services."
+description = "A reusable FastAPI backend foundation with SQLAlchemy, Alembic, Docker, and Kubernetes."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [{name = "Safu Harry", email = "harrysafu@gmail.com"}]
-keywords = ["fastapi", "sqlalchemy", "alembic", "flutter", "docker", "kubernetes", "backend", "scaffolding"]
+keywords = ["fastapi", "sqlalchemy", "alembic", "postgresql", "docker", "kubernetes", "backend", "jwt"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -22,6 +22,7 @@ classifiers = [
     "Framework :: FastAPI",
     "Topic :: Software Development :: Libraries",
 ]
+
 dependencies = [
     "fastapi>=0.115,<1.0",
     "uvicorn[standard]>=0.30,<1.0",
