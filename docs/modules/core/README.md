@@ -1,20 +1,29 @@
 # Core Module
 
-The core module owns cross-cutting infrastructure and the application lifecycle.
+The core module owns cross-cutting infrastructure and the FastAPI application lifecycle.
 
 ## Responsibilities
 
 - Typed environment configuration with Pydantic Settings.
 - Async SQLAlchemy engine/session construction.
-- FastAPI application lifespan and resource cleanup.
-- Structured logging configuration.
+- FastAPI application lifespan and deterministic resource cleanup.
+- Structured logging and request correlation context.
+- Stable exception mapping and error responses.
+- Health and readiness behavior.
 
 ## Boundaries
 
-Core must remain domain-neutral. It must not contain user, billing, order, AI, or other business entities.
+Core remains domain-neutral. It must not contain product-specific user, billing, order, or other business entities.
 
-Application code may consume core abstractions. Core should not import consuming application modules.
+Application code may consume core abstractions. Core should not import consuming application modules. Authentication and identity are separate optional modules.
 
-## Production requirements
+## Runtime contract
 
-Before v1.0, this module must add correlation IDs, a formal exception taxonomy, integration fixtures, safe CORS configuration, and complete type-checking coverage. See [`../../MILESTONES.md`](../../MILESTONES.md).
+- Development and tests may use SQLite.
+- Production requires PostgreSQL with asyncpg.
+- Production debug mode is rejected.
+- CORS origins must be explicitly configured.
+- Database connections are checked during startup.
+- Engine resources are disposed during shutdown.
+
+See MVP acceptance tracker (../../MILESTONES.md) for the verified project scope.
